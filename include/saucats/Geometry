@@ -6,6 +6,8 @@
 #include <saucats/geometry/Line.h>
 #include <saucats/geometry/Sphere.h>
 
+#include <saucats/geometry/intersections/SphereLineIntersection.h>
+
 
 
 #endif // SAUCATS_GEOMETRY_H
