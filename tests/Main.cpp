@@ -3,29 +3,35 @@
 #include <saucats/Geometry>
 #include <saucats/Macros>
 
+#include <iostream>
+using namespace std;
 using namespace saucats;
 
 
 
+// --- Utilities --------------------------------------------------------------
+
 template <class Scalar>
-bool
-relative_distance(Scalar a, Scalar b) {
-	return std::fabs((a - b) / std::min(a, b));
+Scalar
+abs_distance(Scalar a, Scalar b) {
+	return std::fabs(a - b);
 }
 
 
 
 // --- Sphere class checks ----------------------------------------------------
 
+template <class VectorT>
 int
 sphere_distance_consistency_check() {
-	Sphere3d S(1.);
+	SphereT<VectorT> S(1.);
 
-	Sphere3d::vector_type A(.5, 0., 0.);
-	mu_assert(relative_distance(std::pow(S.signed_dist(A), 2), S.squared_dist(A)) <= std::numeric_limits<float>::epsilon(), "inconsistent values returned for SphereT::squared_dist and SphereT::signed_dist");
-
-	Sphere3d::vector_type B(2., 0., 0.);
-	mu_assert(relative_distance(std::pow(S.signed_dist(A), 2), S.squared_dist(A)) <= std::numeric_limits<float>::epsilon(), "inconsistent values returned for SphereT::squared_dist and SphereT::signed_dist");
+	const unsigned int step_count = 16;
+	for(unsigned int i = 0; i < step_count; ++i) {
+		VectorT A = VectorT::Zero();
+		A(0) = (2. * i) / step_count;
+		mu_assert(abs_distance(std::pow(S.signed_dist(A), (typename VectorT::Scalar)2), S.squared_dist(A)) <= std::numeric_limits<typename VectorT::Scalar>::epsilon(), "inconsistent values returned for SphereT::squared_dist and SphereT::signed_dist");
+	}
 
 	// Job done
 	return 0;
@@ -38,7 +44,10 @@ sphere_distance_consistency_check() {
 int
 all_tests() {	
 	// Sphere class tests
-	mu_run_test(sphere_distance_consistency_check);
+	mu_run_test(sphere_distance_consistency_check<Eigen::Vector2f>);
+	mu_run_test(sphere_distance_consistency_check<Eigen::Vector2d>);
+	mu_run_test(sphere_distance_consistency_check<Eigen::Vector3f>);
+	mu_run_test(sphere_distance_consistency_check<Eigen::Vector3d>);
 
 	// Job done
 	return 0;

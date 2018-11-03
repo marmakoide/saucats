@@ -67,7 +67,7 @@ namespace saucats {
 
 		// Returns the square of the Euclidean distance from a point to the sphere
 		scalar_type squared_dist(const vector_type& X) const {
-			double delta_sqr_norm = (m_center - X).squaredNorm();
+			scalar_type delta_sqr_norm = (m_center - X).squaredNorm();
 			return delta_sqr_norm + m_radius_sqr - 2 * std::sqrt(delta_sqr_norm * m_radius_sqr);
 		}
 
