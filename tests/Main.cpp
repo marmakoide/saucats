@@ -1,6 +1,7 @@
 #include <minunit.h>
 
 #include <saucats/Geometry>
+#include <saucats/Macros>
 
 using namespace saucats;
 
@@ -46,7 +47,7 @@ all_tests() {
 
 
 int
-main(int argc, char* argv[]) {
+main(int UNUSED_PARAM(argc), char** UNUSED_PARAM(argv)) {
 	// Enforce a deterministic run
 	srand(1953);
 

@@ -1,0 +1,10 @@
+#ifndef SAUCATS_MACROS
+#define SAUCATS_MACROS
+
+
+
+#define UNUSED_PARAM(x) x __attribute__((unused))
+
+
+
+#endif // SAUCATS_MACROS
