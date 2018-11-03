@@ -1,0 +1,10 @@
+#ifndef SAUCATS_GEOMETRY_H
+#define SAUCATS_GEOMETRY_H
+
+
+#include <saucats/geometry/Box.h>
+#include <saucats/geometry/Sphere.h>
+
+
+
+#endif // SAUCATS_GEOMETRY_H
