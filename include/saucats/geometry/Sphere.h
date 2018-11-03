@@ -73,7 +73,7 @@ namespace saucats {
 
 		// Returns the signed Euclidean distance from a point to the sphere
 		scalar_type signed_dist(const vector_type& X) const {
-			return (m_center - X).norm() - std::sqrt(radius);
+			return (m_center - X).norm() - radius();
 		}
 		
 		// Returns true if a point is inside the sphere
