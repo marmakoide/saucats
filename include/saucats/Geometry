@@ -3,6 +3,7 @@
 
 
 #include <saucats/geometry/Box.h>
+#include <saucats/geometry/Circle.h>
 #include <saucats/geometry/Line.h>
 #include <saucats/geometry/Sphere.h>
 
