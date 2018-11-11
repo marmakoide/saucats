@@ -2,6 +2,7 @@
 
 #include <saucats/Geometry>
 #include <saucats/Macros>
+#include <saucats/SDF>
 
 #include <iostream>
 using namespace std;
@@ -25,37 +26,18 @@ template <class VectorT>
 int
 sphere_contains_consistency_check() {
 	SphereT<VectorT> S(1.);
+	auto sdf = get_sphere_sdf(S);
 
 	const unsigned int step_count = 16;
 	for(unsigned int i = 0; i < step_count; ++i) {
 		VectorT A = VectorT::Zero();
 		A(0) = (2. * i) / step_count;
-		mu_assert(S.contains(A) == (S.signed_dist(A) <= 0.), "inconsistent return returned for SphereT::contains and SphereT::signed_dist");
+		mu_assert(S.contains(A) == (sdf.dist(A) <= 0.), "inconsistent return returned for SphereT::contains and SphereT::signed_dist");
 	}
 
 	// Job done
 	return 0;
 }
-
-
-
-
-template <class VectorT>
-int
-sphere_distance_consistency_check() {
-	SphereT<VectorT> S(1.);
-
-	const unsigned int step_count = 16;
-	for(unsigned int i = 0; i < step_count; ++i) {
-		VectorT A = VectorT::Zero();
-		A(0) = (2. * i) / step_count;
-		mu_assert(abs_distance(std::pow(S.signed_dist(A), (typename VectorT::Scalar)2), S.squared_dist(A)) <= std::numeric_limits<typename VectorT::Scalar>::epsilon(), "inconsistent values returned for SphereT::squared_dist and SphereT::signed_dist");
-	}
-
-	// Job done
-	return 0;
-}
-
 
 
 // --- Entry point ------------------------------------------------------------
@@ -63,11 +45,6 @@ sphere_distance_consistency_check() {
 int
 all_tests() {	
 	// Sphere class tests
-	mu_run_test(sphere_distance_consistency_check<Eigen::Vector2f>);
-	mu_run_test(sphere_distance_consistency_check<Eigen::Vector2d>);
-	mu_run_test(sphere_distance_consistency_check<Eigen::Vector3f>);
-	mu_run_test(sphere_distance_consistency_check<Eigen::Vector3d>);
-
 	mu_run_test(sphere_contains_consistency_check<Eigen::Vector2f>);
 	mu_run_test(sphere_contains_consistency_check<Eigen::Vector2d>);
 	mu_run_test(sphere_contains_consistency_check<Eigen::Vector3f>);

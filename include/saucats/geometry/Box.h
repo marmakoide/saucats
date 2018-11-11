@@ -65,17 +65,6 @@ namespace saucats {
 			return ((X - m_center).cwiseAbs() - m_half_extent).maxCoeff() < 0;
 		}
 
-		// Returns the signed Euclidean distance from a point to the box
-		scalar_type signed_dist(const vector_type& X) const {
-			vector_type M = ((X - m_center).cwiseAbs() - m_half_extent);
-	
-			scalar_type max_coeff = M.maxCoeff();
-			if (max_coeff < 0)
-				return max_coeff;
-	
-			return M.cwiseMax(0).norm();
-		}
-
 		// Returns the corners of the box
 		Eigen::Matrix<scalar_type, CORNER_COUNT, vector_type::RowsAtCompileTime> corners() const {
 			Eigen::Matrix<scalar_type, CORNER_COUNT, vector_type::RowsAtCompileTime> ret;
