@@ -62,7 +62,7 @@ namespace saucats {
 
 		// Returns true if a point is inside the box
 		inline bool contains(const vector_type& X) const {
-			return ((X - m_center).cwiseAbs() - m_half_extent).maxCoeff() < 0;
+			return ((X - m_center).cwiseAbs() - m_half_extent).maxCoeff() <= 0;
 		}
 
 		// Returns the corners of the box
