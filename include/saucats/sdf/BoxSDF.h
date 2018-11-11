@@ -1,8 +1,7 @@
 #ifndef SAUCATS_SDF_BOX_SDF_H
 #define SAUCATS_SDF_BOX_SDF_H
 
-#include <saucats/geometry/Box.h>
-#include <saucats/geometry/Sphere.h>
+#include <saucats/geometry/bounds/BoxBounds.h>
 
 
 
@@ -37,7 +36,7 @@ namespace saucats {
 		}
 
 		inline sphere_type get_bounding_sphere() const {
-			return sphere_type(m_box.half_extent().norm(), m_box.center());
+			return get_bounding_sphere(m_box);
 		}
 
 	private:

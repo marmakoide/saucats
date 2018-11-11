@@ -1,7 +1,7 @@
 #ifndef SAUCATS_SDF_SPHERE_SDF_H
 #define SAUCATS_SDF_SPHERE_SDF_H
 
-#include <saucats/geometry/Sphere.h>
+#include <saucats/geometry/bounds/SphereBounds.h>
 
 
 
@@ -30,7 +30,7 @@ namespace saucats {
 		}
 
 		inline sphere_type get_bounding_sphere() const {
-			return m_sphere;
+			return get_bounding_sphere(m_sphere);
 		}
 
 	private:

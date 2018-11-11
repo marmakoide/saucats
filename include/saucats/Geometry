@@ -7,6 +7,8 @@
 #include <saucats/geometry/Line.h>
 #include <saucats/geometry/Sphere.h>
 
+#include <saucats/geometry/bounds/BoxBounds.h>
+#include <saucats/geometry/bounds/SphereBounds.h>
 #include <saucats/geometry/bounds/SphereListBounds.h>
 
 #include <saucats/geometry/intersections/SphereLineIntersection.h>
