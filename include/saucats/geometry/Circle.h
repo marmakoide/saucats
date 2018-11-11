@@ -86,22 +86,6 @@ namespace saucats {
 			return m_normal;
 		}
 
-		// Returns the square of the Euclidean distance from a point to the circle
-		scalar_type
-		squared_dist(const vector_type& X) const {
-			vector_type Y = X - m_center;
-			scalar_type d = m_normal.dot(Y);
-			vector_type H = Y - d * m_normal;
-			Eigen::Matrix<scalar_type, 2, 1> I(H.norm() - m_radius, d);
-			return I.squaredNorm();
-		}
-
-		// Returns the Euclidean distance from a point to the circle
-		inline scalar_type
-		dist(const vector_type& X) const {
-			return std::sqrt(squared_dist(X));
-		}
-
 	private:
 		scalar_type m_radius;
 		vector_type m_center;
