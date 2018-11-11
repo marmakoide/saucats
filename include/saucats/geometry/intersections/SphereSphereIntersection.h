@@ -7,13 +7,13 @@
 
 
 namespace saucats {
-/*
+	/*
    Sphere/Sphere intersection
 
    The intersection is a circle of center M, embedded on a plane centered on M
    and normal N. Even if there's no intersection, the separator plane is computed.
    This gives a plane guaranted to separate two spheres.
- */
+	 */
 
 	template <class VectorT>
 	class SphereSphereIntersectionT {
