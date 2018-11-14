@@ -70,7 +70,20 @@ namespace saucats {
 			return (X - m_center).squaredNorm() <= m_radius_sqr;
 		}
 
+		// Surface area of the sphere (in 2d, it equals to the perimeter)
+		inline scalar_type surface_area() const {
+			return UNIT_BALL_SURFACE_AREA * std::pow(std::sqrt(m_radius_sqr), vector_type::RowsAtCompileTime - 1);
+		}
+
+		// Volume of the sphere (in 2d, it equals to the surface area)
+		inline scalar_type volume() const {
+			return UNIT_BALL_VOLUME * std::pow(std::sqrt(m_radius_sqr), vector_type::RowsAtCompileTime);
+		}
+
 	private:
+		static const double UNIT_BALL_SURFACE_AREA;
+		static const double UNIT_BALL_VOLUME;
+
 		scalar_type m_radius_sqr;
 		vector_type m_center;
 	}; // class SphereT
@@ -81,6 +94,33 @@ namespace saucats {
 	typedef SphereT<Eigen::Vector2d> Sphere2d;
 	typedef SphereT<Eigen::Vector3f> Sphere3f;
 	typedef SphereT<Eigen::Vector3d> Sphere3d;
+
+
+
+	/*
+	 * Compilation time computation of the volume and surface areas constants
+	 */
+
+	constexpr double get_unit_ball_surface_area(int n);
+	constexpr double get_unit_ball_volume(int n);
+
+	constexpr double
+	get_unit_ball_surface_area(int n) {
+		return n == 0 ? 2. : (2 * M_PI) * get_unit_ball_volume(n - 1);
+	}
+
+	constexpr double
+	get_unit_ball_volume(int n) {
+		return n == 0 ? 1. : get_unit_ball_surface_area(n - 1) / n;
+	}
+
+
+
+	template <class VectorT> const double
+	SphereT<VectorT>::UNIT_BALL_SURFACE_AREA = get_unit_ball_surface_area(VectorT::RowsAtCompileTime - 1);
+
+	template <class VectorT> const double
+	SphereT<VectorT>::UNIT_BALL_VOLUME = get_unit_ball_volume(VectorT::RowsAtCompileTime);
 } // namespace saucats
 
 
