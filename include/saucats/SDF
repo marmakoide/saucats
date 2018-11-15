@@ -5,6 +5,7 @@
 
 #include <saucats/sdf/BoxSDF.h>
 #include <saucats/sdf/CircleSDF.h>
+#include <saucats/sdf/SegmentSDF.h>
 #include <saucats/sdf/SphereSDF.h>
 
 
