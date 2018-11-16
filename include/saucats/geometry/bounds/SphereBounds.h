@@ -11,7 +11,7 @@ namespace saucats {
 	template <class VectorT>
 	BoxT<VectorT>
 	get_bounding_box(const SphereT<VectorT>& sphere) {
-		return BoxT<VectorT>(VectorT::Constant(sphere.radius()), sphere.center());
+		return BoxT<VectorT>(VectorT::Constant(2 * sphere.radius()), sphere.center());
 	}
 
 	// Bounding sphere of a sphere (yeah... for completleness)
