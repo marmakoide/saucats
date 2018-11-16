@@ -26,9 +26,9 @@ namespace saucats {
 		template <typename InVectorT>
 		inline typename InVectorT::Scalar
 		dist(const InVectorT& X) const {
-			vector_type U = X - m_segment.line().origin();
-			scalar_type x = m_segment.line().direction().dot(U);
-			scalar_type k = std::copysign(std::fmin(std::fabs(x), m_segment.half_length()), x);
+			InVectorT U = X - m_segment.line().origin();
+			typename InVectorT::Scalar x = m_segment.line().direction().dot(U);
+			typename InVectorT::Scalar k = std::copysign(std::min(std::fabs(x), m_segment.half_length()), x);
 			return std::sqrt(U.squaredNorm() + k * (k - 2 * x));				
 		}
 
