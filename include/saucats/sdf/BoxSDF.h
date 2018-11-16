@@ -26,9 +26,9 @@ namespace saucats {
 		template <typename InVectorT>
 		inline typename InVectorT::Scalar
 		dist(const InVectorT& X) const {
-			vector_type M = ((X - m_box.center()).cwiseAbs() - m_box.half_extent());
+			InVectorT M = ((X - m_box.center()).cwiseAbs() - m_box.half_extent());
 	
-			scalar_type max_coeff = M.maxCoeff();
+			typename InVectorT::Scalar max_coeff = M.maxCoeff();
 			if (max_coeff < 0)
 				return max_coeff;
 	
