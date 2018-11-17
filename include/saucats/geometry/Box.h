@@ -79,7 +79,7 @@ namespace saucats {
 
 		// Returns the volume (or surface area in 2d) of the box
 		inline scalar_type volume() const {
-			return std::pow(2, vector_type::RowsAtCompileTime) * m_half_extent.prod();
+			return std::pow(scalar_type(2), scalar_type(vector_type::RowsAtCompileTime)) * m_half_extent.prod();
 		}
 
 	private:
