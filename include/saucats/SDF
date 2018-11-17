@@ -9,6 +9,8 @@
 #include <saucats/sdf/SegmentSDF.h>
 #include <saucats/sdf/SphereSDF.h>
 
+#include <saucats/sdf/utils/Gradient.h>
+
 
 
 #endif // SAUCATS_SDF_H
