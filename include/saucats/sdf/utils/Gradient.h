@@ -11,7 +11,7 @@ namespace saucats {
 
 
 	template <class FuncT, typename VectorT>
-	typename VectorT
+	VectorT
 	get_sdf_gradient(const FuncT& func,
 	                 const VectorT& X,
 	                 typename VectorT::Scalar eps) {
