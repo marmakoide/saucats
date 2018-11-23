@@ -1,5 +1,5 @@
-#ifndef SAUCATS_MACROS
-#define SAUCATS_MACROS
+#ifndef SAUCATS_MACROS_H
+#define SAUCATS_MACROS_H
 
 
 
@@ -7,4 +7,4 @@
 
 
 
-#endif // SAUCATS_MACROS
+#endif // SAUCATS_MACROS_H
