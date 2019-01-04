@@ -41,7 +41,7 @@ namespace saucats {
 
 	private:
 		box_type m_box;
-	}; // classBoxSDF
+	}; // class BoxSDF
 
 
 

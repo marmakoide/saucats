@@ -39,7 +39,7 @@ namespace saucats {
 
 	private:
 		circle_type m_circle;
-	}; // class SphereSDF
+	}; // class CircleSDF
 
 
 
