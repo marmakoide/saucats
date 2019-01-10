@@ -121,14 +121,8 @@ namespace saucats {
 		B = U.rowwise().norm();
 		U = B.asDiagonal().inverse() * U;
 
-		Eigen::Matrix<value_type, vector_type::RowsAtCompileTime, vector_type::RowsAtCompileTime> M;
-		for(Eigen::Index i = 0; i < vector_type::RowsAtCompileTime; ++i) {
-			for(Eigen::Index j = i + 1; j < vector_type::RowsAtCompileTime; ++j) {
-				M.coeffRef(i, j) = U.row(i).dot(U.row(j));
-				M.coeffRef(j, i) = U.row(i).dot(U.row(j));		
-			}
-		}
-		M.diagonal() = Eigen::Matrix<value_type, vector_type::RowsAtCompileTime, 1>::Ones();
+		Eigen::Matrix<value_type, vector_type::RowsAtCompileTime, vector_type::RowsAtCompileTime> M =
+			U * U.transpose();
 
 		B /= 2;
 		B = M.colPivHouseholderQr().solve(B);
