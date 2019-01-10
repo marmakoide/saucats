@@ -3,7 +3,9 @@
 #include <saucats/Geometry>
 #include <saucats/Macros>
 #include <saucats/SDF>
+#include <saucats/utils/ArrayT.h>
 
+#include <random>
 #include <iostream>
 
 using namespace std;
@@ -92,6 +94,44 @@ sphere_volume_check() {
 
 
 
+template <class VectorT>
+int
+sphere_circumsphere_check() {
+	typedef typename VectorT::Scalar value_type;
+
+	std::default_random_engine rng;
+	std::normal_distribution<value_type> gd;
+	 std::uniform_real_distribution<> ud(0., 1.);
+
+	for(int trial_count = 0; trial_count < 16; ++trial_count) {
+		// Generate the radius and the center of the disc
+		value_type radius = ud(rng);
+		VectorT center = VectorT::Random();
+
+		// Generate 3 points on the disc
+		ArrayT<VectorT> points(VectorT::RowsAtCompileTime + 1);
+		for(std::size_t i = 0; i < points.size(); ++i) {
+			VectorT P;
+			for(Eigen::Index j = 0; j < VectorT::RowsAtCompileTime; ++j)
+				P.coeffRef(j) = gd(rng);
+
+			points[i] = radius * P.normalized() + center;
+		}
+
+		// Compute circumcircle
+		SphereT<VectorT> circle = get_circumsphere(points);
+
+		// Check the circumcircle
+		mu_assert(std::fabs(radius - circle.radius()) <= 1e-3, "wrong circumsphere radius");
+		mu_assert((center - circle.center()).squaredNorm() <= 1e-5, "wrong circumsphere center");
+	}
+
+	// Job done
+	return 0;
+}
+
+
+
 // --- Entry point ------------------------------------------------------------
 
 int
@@ -111,6 +151,13 @@ all_tests() {
 	mu_run_test(sphere_volume_check<Eigen::Vector2d>);
 	mu_run_test(sphere_volume_check<Eigen::Vector3d>);
 	mu_run_test(sphere_volume_check<Eigen::Vector4d>);	
+
+	mu_run_test(sphere_circumsphere_check<Eigen::Vector2f>);
+	mu_run_test(sphere_circumsphere_check<Eigen::Vector2d>);
+	mu_run_test(sphere_circumsphere_check<Eigen::Vector3f>);
+	mu_run_test(sphere_circumsphere_check<Eigen::Vector3d>);
+	mu_run_test(sphere_circumsphere_check<Eigen::Vector4f>);
+	mu_run_test(sphere_circumsphere_check<Eigen::Vector4d>);
 
 	// Job done
 	return 0;

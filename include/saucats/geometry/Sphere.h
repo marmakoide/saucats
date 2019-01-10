@@ -98,6 +98,47 @@ namespace saucats {
 
 
 	/*
+	 * Computes the circumsphere of N+1 points, for N dimensional points
+	 * Assumes that the points are all different
+	 */
+
+	template <class point_collection_type>
+	SphereT<typename point_collection_type::value_type>
+	get_circumsphere(const point_collection_type& point_collection) {
+		typedef typename point_collection_type::value_type vector_type;
+		typedef typename vector_type::Scalar value_type;
+
+		typename point_collection_type::const_iterator it = point_collection.begin();
+		vector_type A = (*it);
+		
+		++it;
+		Eigen::Matrix<value_type, vector_type::RowsAtCompileTime, vector_type::RowsAtCompileTime> U;
+		for(Eigen::Index i = 0; i < vector_type::RowsAtCompileTime; ++it, ++i)
+			U.row(i) = *it;
+		U.array().rowwise() -= A.array().transpose();
+
+		Eigen::Matrix<value_type, vector_type::RowsAtCompileTime, 1> B;
+		B = U.rowwise().norm();
+		U = B.asDiagonal().inverse() * U;
+
+		Eigen::Matrix<value_type, vector_type::RowsAtCompileTime, vector_type::RowsAtCompileTime> M;
+		for(Eigen::Index i = 0; i < vector_type::RowsAtCompileTime; ++i) {
+			for(Eigen::Index j = i + 1; j < vector_type::RowsAtCompileTime; ++j) {
+				M.coeffRef(i, j) = U.row(i).dot(U.row(j));
+				M.coeffRef(j, i) = U.row(i).dot(U.row(j));		
+			}
+		}
+		M.diagonal() = Eigen::Matrix<value_type, vector_type::RowsAtCompileTime, 1>::Ones();
+
+		B /= 2;
+		B = M.colPivHouseholderQr().solve(B);
+		B = B.transpose() * U;
+
+		return SphereT<vector_type>(B + A, B.norm());
+	}
+
+
+	/*
 	 * Compilation time computation of the volume and surface areas constants
 	 */
 
