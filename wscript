@@ -10,7 +10,7 @@ top, out = '.', 'build'
 
 
 def options(context):
-	context.load('compiler_cxx')
+	context.load('compiler_cxx gnu_dirs')
 
 
 
