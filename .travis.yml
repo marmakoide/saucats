@@ -6,4 +6,4 @@ os:
   - linux
 before_install:
   - sudo apt-get update && sudo apt-get install -y libeigen3-dev
-script: waf && waf build_debug && ./build/debug/saucats-unitest
+script: ./waf configure && ./waf build_debug && ./build/debug/saucats-unitest
