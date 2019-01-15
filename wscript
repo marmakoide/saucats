@@ -10,7 +10,7 @@ top, out = '.', 'build'
 
 
 def options(context):
-	context.load('compiler_cxx compiler_c gnu_dirs')
+	context.load('compiler_cxx')
 
 
 
@@ -19,7 +19,6 @@ def configure(context):
 	context.load('compiler_cxx')
 	context.env.CXXFLAGS = ['-std=c++14', '-Wall', '-Wextra', '-O3', '-g', '-frounding-math']
 	context.check_cfg(package = 'eigen3', uselib_store = 'eigen', args = ['--cflags'])
-	context.check_cc(lib = 'm', cflags = '-Wall', uselib_store = 'm')
 
 	context.setenv('release', env = context.env.derive())
 
@@ -60,6 +59,7 @@ def build(context):
 			target   = 'saucats-unitest',
 			includes = 'tests',
 			source   = context.path.ant_glob('tests/*.cpp'),
-			use      = ['saucats', 'eigen', 'm']
+			lib      = ['m'],
+			use      = ['saucats', 'eigen']
 		)
 
