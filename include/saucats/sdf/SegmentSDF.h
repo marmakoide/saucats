@@ -19,6 +19,7 @@ namespace saucats {
 		typedef SphereT<VectorT> sphere_type;
 
 
+		inline SegmentSDF() { }
 
 		inline SegmentSDF(const segment_type& segment)
 			: m_segment(segment) { }
