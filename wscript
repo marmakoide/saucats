@@ -18,7 +18,7 @@ def configure(context):
 	context.setenv('debug')
 	context.load('compiler_cxx')
 	context.env.CXXFLAGS = ['-std=c++14', '-Wall', '-Wextra', '-O3', '-g', '-frounding-math']
-	context.check_cfg(package = 'eigen3', uselib_store = 'eigen', args = ['--cflags'])
+	context.check_cfg(package = 'eigen3', uselib_store = 'eigen', args = ['eigen3 >= 3.3', '--cflags'])
 
 	context.setenv('release', env = context.env.derive())
 
