@@ -98,7 +98,8 @@ namespace saucats {
 
 
 	/*
-	 * Computes the circumsphere of N+1 points, for N dimensional points
+	 * Computes the smallest circumsphere of at most N+1 points, for N dimensional 
+	 * points
 	 * Assumes that the points are all different
 	 */
 
@@ -112,17 +113,18 @@ namespace saucats {
 		vector_type A = (*it);
 		
 		++it;
-		Eigen::Matrix<value_type, vector_type::RowsAtCompileTime, vector_type::RowsAtCompileTime> U;
-		for(Eigen::Index i = 0; i < vector_type::RowsAtCompileTime; ++it, ++i)
+		Eigen::Matrix<value_type, Eigen::Dynamic, vector_type::RowsAtCompileTime> U;
+		U.resize(Eigen::Index(point_collection.size() - 1), vector_type::RowsAtCompileTime);
+		for(typename point_collection_type::size_type i = 0; i < point_collection.size() - 1; ++it, ++i)
 			U.row(i) = *it;
 		U.array().rowwise() -= A.array().transpose();
 
-		Eigen::Matrix<value_type, vector_type::RowsAtCompileTime, 1> B;
+		Eigen::Matrix<value_type, Eigen::Dynamic, 1> B;
 		B = U.rowwise().norm();
 		U = B.asDiagonal().inverse() * U;
 
-		Eigen::Matrix<value_type, vector_type::RowsAtCompileTime, vector_type::RowsAtCompileTime> M =
-			U * U.transpose();
+		Eigen::Matrix<value_type, Eigen::Dynamic, Eigen::Dynamic> M;
+		M =	U * U.transpose();
 
 		B /= 2;
 		B = M.colPivHouseholderQr().solve(B);

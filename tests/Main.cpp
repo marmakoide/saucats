@@ -108,7 +108,7 @@ sphere_circumsphere_check() {
 		value_type radius = ud(rng);
 		VectorT center = VectorT::Random();
 
-		// Generate 3 points on the disc
+		// Generate n + 1 points on the disc
 		ArrayT<VectorT> points(VectorT::RowsAtCompileTime + 1);
 		for(std::size_t i = 0; i < points.size(); ++i) {
 			VectorT P;
