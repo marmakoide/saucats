@@ -1,7 +1,9 @@
 [![Build Status](https://travis-ci.com/marmakoide/saucats.svg?branch=master)](https://travis-ci.com/marmakoide/saucats) [![MIT License badge](https://img.shields.io/badge/license-MIT-green.svg)](https://github.com/marmakoide/saucats/blob/master/LICENSE)
 
 # saucats
-A C++ library to define and manipulate geometrical shapes
+A C++ library to define and manipulate geometrical shapes using distance fields
+
+This a header-only library and depends on the [Eigen library](http://eigen.tuxfamily.org).
 
 ## Authors
 
