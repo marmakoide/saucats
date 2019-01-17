@@ -47,7 +47,7 @@ namespace saucats {
 	 */
 
 	template <class sphere_collection_type>
-	class BoundingBallT {
+	class SphereCollectionBoundingBallT {
 	public:
 		typedef typename sphere_collection_type::value_type sphere_type;
 		typedef typename sphere_type::vector_type vector_type;
@@ -153,7 +153,7 @@ namespace saucats {
 
 			return ret;
 		}
-	}; // class BoundingBallT
+	}; // class SphereCollectionBoundingBallT
 
 
 
@@ -161,7 +161,7 @@ namespace saucats {
 	static SphereT<typename sphere_collection_type::value_type::vector_type>
 	get_bounding_sphere(const sphere_collection_type& sphere_collection,
   	                  typename sphere_collection_type::value_type::scalar_type epsilon) {
-		return BoundingBallT<sphere_collection_type>().get_bounding_sphere(sphere_collection, epsilon);
+		return SphereCollectionBoundingBallT<sphere_collection_type>().get_bounding_sphere(sphere_collection, epsilon);
 	}
 } // namespace saucats
 
