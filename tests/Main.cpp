@@ -109,7 +109,7 @@ sphere_circumsphere_check() {
 		VectorT center = VectorT::Random();
 
 		// Generate n + 1 points on the disc
-		ArrayT<VectorT> points(VectorT::RowsAtCompileTime + 1);
+		std::vector<VectorT> points(VectorT::RowsAtCompileTime + 1);
 		for(std::size_t i = 0; i < points.size(); ++i) {
 			VectorT P;
 			for(Eigen::Index j = 0; j < VectorT::RowsAtCompileTime; ++j)
@@ -119,7 +119,7 @@ sphere_circumsphere_check() {
 		}
 
 		// Compute circumcircle
-		SphereT<VectorT> circle = get_circumsphere(points);
+		SphereT<VectorT> circle = get_circumsphere(points.begin(), points.end());
 
 		// Check the circumcircle
 		mu_assert(std::fabs(radius - circle.radius()) <= 1e-3, "wrong circumsphere radius");

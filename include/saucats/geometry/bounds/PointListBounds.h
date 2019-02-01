@@ -67,10 +67,10 @@ namespace saucats {
 			if (index_list.empty())
 				return sphere_type();
 
-			ArrayT<point_type> point_subset(std::min(index_list.size(), index_list_type::size_type(point_type::RowsAtCompileTime) + 1));
+			std::vector<point_type> point_subset(std::min(index_list.size(), index_list_type::size_type(point_type::RowsAtCompileTime) + 1));
 			std::transform(index_list.begin(), std::next(index_list.begin(), point_subset.size()), point_subset.begin(), [start_it](index_type i) { return *std::next(start_it, i); });
 			
-			sphere_type D = get_circumsphere(point_subset);
+			sphere_type D = get_circumsphere(point_subset.begin(), point_subset.end());
 		
 			if (index_list.size() <= index_list_type::size_type(point_type::RowsAtCompileTime) + 1)
 				return D;

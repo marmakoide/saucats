@@ -103,23 +103,24 @@ namespace saucats {
 	 * Assumes that the points are all different
 	 */
 
-	template <class point_collection_type>
-	SphereT<typename point_collection_type::value_type>
-	get_circumsphere(const point_collection_type& point_collection) {
-		typedef typename point_collection_type::value_type vector_type;
+	template <class iterator_type>
+	SphereT<typename iterator_type::value_type>
+	get_circumsphere(iterator_type start_it,
+	                 iterator_type end_it) {
+		typedef typename iterator_type::value_type vector_type;
 		typedef typename vector_type::Scalar value_type;
 
-		if (point_collection.size() == 1)
-			return SphereT<vector_type>(*(point_collection.begin()));
+		auto point_count = std::distance(start_it, end_it);
+		if (point_count == 1)
+			return SphereT<vector_type>(*start_it);
 
-		typename point_collection_type::const_iterator it = point_collection.begin();
-		vector_type A = *it;
-		
-		++it;
+		vector_type A = *start_it;
+		++start_it;
+
 		Eigen::Matrix<value_type, Eigen::Dynamic, vector_type::RowsAtCompileTime> U;
-		U.resize(Eigen::Index(point_collection.size() - 1), vector_type::RowsAtCompileTime);
-		for(typename point_collection_type::size_type i = 0; i < point_collection.size() - 1; ++it, ++i)
-			U.row(i) = *it;
+		U.resize(Eigen::Index(point_count - 1), vector_type::RowsAtCompileTime);
+		for(Eigen::Index i = 0; i < point_count - 1; ++start_it, ++i)
+			U.row(i) = *start_it;
 		U.array().rowwise() -= A.array().transpose();
 
 		Eigen::Matrix<value_type, Eigen::Dynamic, 1> B;
