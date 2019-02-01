@@ -11,16 +11,19 @@ namespace saucats {
 	 * Compute the minimum volume axis-aligned box bounding of a collection of spheres
 	 */
 
-	template <class sphere_collection_type>
-	BoxT<typename sphere_collection_type::value_type::vector_type>
-	get_bounding_box(const sphere_collection_type& sphere_collection) {
-		typedef typename sphere_collection_type::value_type sphere_type;
+	template <class iterator_type>
+	BoxT<typename iterator_type::value_type::vector_type>
+	get_bounding_box(iterator_type start_it,
+	                 iterator_type end_it) {
+		typedef typename iterator_type::value_type sphere_type;
 		typedef typename sphere_type::vector_type vector_type;
 
 		vector_type min_corner, max_corner;
 
 		bool first_item = true;
-		for(const sphere_type& sphere : sphere_collection) {
+		for(; start_it != end_it; ++start_it) {
+			const sphere_type& sphere = *start_it;
+
 			vector_type lo = sphere.center().array() - sphere.radius();
 			vector_type hi = sphere.center().array() + sphere.radius();
 
