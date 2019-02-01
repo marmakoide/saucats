@@ -148,7 +148,7 @@ smallest_bounding_sphere_check() {
 			// Generate a support sphere from n+1 points
 			std::vector<VectorT> support_points(VectorT::RowsAtCompileTime + 1);
 			std::generate(support_points.begin(), support_points.end(), [] () -> VectorT { return VectorT::Random(); });
-			SphereT<VectorT> support_sphere = get_bounding_sphere(support_points.begin(), support_points.end());
+			SphereT<VectorT> support_sphere = point_collection::get_bounding_sphere(support_points.begin(), support_points.end());
 
 			// Generate points inside the support sphere
 			std::vector<VectorT> points(count);
@@ -166,7 +166,7 @@ smallest_bounding_sphere_check() {
 			});
 
 			// Get the bounding sphere
-			SphereT<VectorT> bounding_sphere = get_bounding_sphere(points.begin(), points.end());
+			SphereT<VectorT> bounding_sphere = point_collection::get_bounding_sphere(points.begin(), points.end());
 
 			// Check that the bounding sphere and the support sphere are equivalent up to machine precision
 			mu_assert(std::fabs(bounding_sphere.radius() - support_sphere.radius()) <= 1e-3, "wrong circumsphere radius");
