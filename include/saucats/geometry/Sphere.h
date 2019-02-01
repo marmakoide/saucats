@@ -109,8 +109,11 @@ namespace saucats {
 		typedef typename point_collection_type::value_type vector_type;
 		typedef typename vector_type::Scalar value_type;
 
+		if (point_collection.size() == 1)
+			return SphereT<vector_type>(*(point_collection.begin()));
+
 		typename point_collection_type::const_iterator it = point_collection.begin();
-		vector_type A = (*it);
+		vector_type A = *it;
 		
 		++it;
 		Eigen::Matrix<value_type, Eigen::Dynamic, vector_type::RowsAtCompileTime> U;
