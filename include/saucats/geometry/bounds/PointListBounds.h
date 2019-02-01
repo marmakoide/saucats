@@ -25,19 +25,12 @@ namespace saucats {
 		                 iterator_type end_it) {
 			typedef typename iterator_type::vector_type vector_type;
 
-			vector_type min_corner, max_corner;
+			vector_type min_corner = *start_it;
+			vector_type max_corner = *start_it;
 
-			bool first_item = true;
-			for(; start_it != end_it; ++start_it) {
-				if (first_item) {
-					min_corner = *start_it;
-					max_corner = *end_it;
-					first_item = false;
-				}
-				else {
-					min_corner = min_corner.cwiseMin(*start_it);
-					max_corner = max_corner.cwiseMax(*end_it);
-				}
+			for(++start_it; start_it != end_it; ++start_it) {
+				min_corner = min_corner.cwiseMin(*start_it);
+				max_corner = max_corner.cwiseMax(*start_it);
 			}
 
 			return
