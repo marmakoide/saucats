@@ -23,6 +23,28 @@ abs_distance(Scalar a, Scalar b) {
 
 
 
+// --- Sphere sampling checks -------------------------------------------------
+
+template <class VectorT>
+int
+sphere_surface_sampling_consistency_check() {
+	VectorT center = VectorT::Random();
+
+	SphereT<VectorT> sphere(center, 1);
+	auto sampler = get_sphere_surface_sampler(sphere);
+
+	std::default_random_engine rng;
+	for(unsigned int i = 0; i < 32; ++i) {
+		VectorT X = sampler.get_sample(rng);
+		mu_assert(((X - center).squaredNorm() - sphere.squared_radius()) < 1e-6, "inconsistent distance to sphere center");
+	}
+
+	// Job done
+	return 0;
+}
+
+
+
 // --- Box class checks -------------------------------------------------------
 
 template <class VectorT>
@@ -183,7 +205,15 @@ smallest_bounding_sphere_check() {
 // --- Entry point ------------------------------------------------------------
 
 int
-all_tests() {	
+all_tests() {
+	// Sphere sampling tests
+	mu_run_test(sphere_surface_sampling_consistency_check<Eigen::Vector2f>);
+	mu_run_test(sphere_surface_sampling_consistency_check<Eigen::Vector2d>);
+	mu_run_test(sphere_surface_sampling_consistency_check<Eigen::Vector3f>);
+	mu_run_test(sphere_surface_sampling_consistency_check<Eigen::Vector3d>);
+	mu_run_test(sphere_surface_sampling_consistency_check<Eigen::Vector4f>);
+	mu_run_test(sphere_surface_sampling_consistency_check<Eigen::Vector4d>);
+	
 	// Sphere class tests
 	mu_run_test(box_contains_consistency_check<Eigen::Vector2f>);
 	mu_run_test(box_contains_consistency_check<Eigen::Vector2d>);
