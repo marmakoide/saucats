@@ -119,33 +119,24 @@ sphere_volume_check() {
 template <class VectorT>
 int
 sphere_circumsphere_check() {
-	typedef typename VectorT::Scalar value_type;
-
 	std::default_random_engine rng;
-	std::normal_distribution<value_type> gd;
 	std::uniform_real_distribution<> ud(0., 1.);
 
 	for(int trial_count = 0; trial_count < 16; ++trial_count) {
-		// Generate the radius and the center of the disc
-		value_type radius = ud(rng);
-		VectorT center = VectorT::Random();
+		// Generate the radius and the center of the sphere
+		SphereT<VectorT> sphere(VectorT::Random(), ud(rng));
 
-		// Generate n + 1 points on the disc
+		// Generate n + 1 points on the sphere
 		std::vector<VectorT> points(VectorT::RowsAtCompileTime + 1);
-		for(std::size_t i = 0; i < points.size(); ++i) {
-			VectorT P;
-			for(Eigen::Index j = 0; j < VectorT::RowsAtCompileTime; ++j)
-				P.coeffRef(j) = gd(rng);
+		auto sampler = get_sphere_surface_sampler(sphere);
+		std::generate(points.begin(), points.end(), [&sampler, &rng] () { return sampler.get_sample(rng); });
 
-			points[i] = radius * P.normalized() + center;
-		}
-
-		// Compute circumcircle
-		SphereT<VectorT> circle = get_circumsphere(points.begin(), points.end());
+		// Compute circumsphere
+		SphereT<VectorT> circumsphere = get_circumsphere(points.begin(), points.end());
 
 		// Check the circumcircle
-		mu_assert(std::fabs(radius - circle.radius()) <= 1e-3, "wrong circumsphere radius");
-		mu_assert((center - circle.center()).squaredNorm() <= 1e-5, "wrong circumsphere center");
+		mu_assert(std::fabs(sphere.radius() - circumsphere.radius()) <= 1e-3, "wrong circumsphere radius");
+		mu_assert((sphere.center() - circumsphere.center()).squaredNorm() <= 1e-5, "wrong circumsphere center");
 	}
 
 	// Job done
@@ -167,15 +158,20 @@ smallest_bounding_sphere_check() {
 
 	for(int trial_count = 0; trial_count < 16; ++trial_count) {
 		for(Eigen::Index count = VectorT::RowsAtCompileTime + 2; count < VectorT::RowsAtCompileTime + 30; ++count) {
-			// Generate a support sphere from n+1 points
+			// Generate the radius and the center of the sphere
+			SphereT<VectorT> seed_sphere(VectorT::Random(), ud(rng));
+
+			// Generate n + 1 points on the support sphere surface
+			auto sampler = get_sphere_surface_sampler(seed_sphere);
+
 			std::vector<VectorT> support_points(VectorT::RowsAtCompileTime + 1);
-			std::generate(support_points.begin(), support_points.end(), [] () -> VectorT { return VectorT::Random(); });
+			std::generate(support_points.begin(), support_points.end(), [&sampler, &rng] () { return sampler.get_sample(rng); });			
 			SphereT<VectorT> support_sphere = point_collection::get_bounding_sphere(support_points.begin(), support_points.end());
 
 			// Generate points inside the support sphere
 			std::vector<VectorT> points(count);
 			std::copy(support_points.begin(), support_points.end(), points.begin());
-			std::generate(points.begin() + support_points.size(), points.end(), [&support_sphere, &rng, &gd, &ud] () -> VectorT {
+			std::generate(std::next(points.begin(), support_points.size()), points.end(), [&support_sphere, &rng, &gd, &ud] () -> VectorT {
 				VectorT P;
 				for(Eigen::Index j = 0; j < VectorT::RowsAtCompileTime; ++j)
 					P.coeffRef(j) = gd(rng);
@@ -184,7 +180,6 @@ smallest_bounding_sphere_check() {
 				P *= support_sphere.radius() * radius / P.norm();
 				P += support_sphere.center();
 				return P;
-				//return support_sphere.center();
 			});
 
 			// Get the bounding sphere
