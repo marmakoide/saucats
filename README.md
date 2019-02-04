@@ -40,7 +40,12 @@ If you do not want to compile the test cases
 
 You can then install the headers and the test cases
 ```
-./waf install
+./waf install_debug
+```
+
+Or you can install just the headers
+```
+./waf install_release
 ```
 
 ## Authors
