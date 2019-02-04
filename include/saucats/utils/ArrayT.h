@@ -1,7 +1,6 @@
 #ifndef SAUCATS_UTILS_ARRAY_T_H
 #define SAUCATS_UTILS_ARRAY_T_H
 
-#include <cstddef>
 #include <algorithm>
 
 
@@ -20,19 +19,19 @@ namespace saucats {
 	template <class T>
 	class ArrayT {
 	public:
-		typedef T         value_type;
-		typedef T*        iterator;
-		typedef const T*  const_iterator;
-		typedef T&        reference;
-		typedef const T&  const_reference;
-		typedef size_t    size_type;
-		typedef ptrdiff_t difference_type;
+		typedef T           value_type;
+		typedef T*          iterator;
+		typedef const T*    const_iterator;
+		typedef T&          reference;
+		typedef const T&    const_reference;
+		typedef std::size_t size_type;
+		typedef ptrdiff_t   difference_type;
 
 
 
 		inline ArrayT() : m_size(0), m_data(0) { }
 
-		inline ArrayT(size_t size) : m_size(size) {
+		inline ArrayT(size_type size) : m_size(size) {
 			allocate();
 		}
 
@@ -92,7 +91,7 @@ namespace saucats {
 			return m_size == 0;
 		}
 
-		inline size_t size() const {
+		inline size_type size() const {
 			return m_size;
 		}
 
@@ -112,19 +111,19 @@ namespace saucats {
 			return m_data[m_size - 1];
 		}
 
-		inline T& operator () (size_t i) {
+		inline T& operator () (size_type i) {
 			return m_data[i];
 		}
 
-		inline const T& operator () (size_t i) const {
+		inline const T& operator () (size_type i) const {
 			return m_data[i];
 		}
 
-		inline T& operator [] (size_t i) {
+		inline T& operator [] (size_type i) {
 			return m_data[i];
 		}
 
-		inline const T& operator [] (size_t i) const {
+		inline const T& operator [] (size_type i) const {
 			return m_data[i];
 		}
 
@@ -144,7 +143,7 @@ namespace saucats {
 
 
 
-		size_t m_size;
+		size_type m_size;
 		T* m_data;
 	}; // class ArrayT
 } // namespace saucats
