@@ -1,0 +1,10 @@
+prefix=@PREFIX@
+includedir=${prefix}/include
+
+Name: saucats
+Description: A C++ library to define and manipulate geometrical shapes using distance fields
+Version: @VERSION@
+Requires: eigen3
+Libs:
+Cflags: -I${includedir}
+
