@@ -6,6 +6,7 @@
 #include <saucats/sdf/BoxSDF.h>
 #include <saucats/sdf/CircleSDF.h>
 #include <saucats/sdf/Offset.h>
+#include <saucats/sdf/PolygonSDF.h>
 #include <saucats/sdf/SegmentSDF.h>
 #include <saucats/sdf/SphereSDF.h>
 

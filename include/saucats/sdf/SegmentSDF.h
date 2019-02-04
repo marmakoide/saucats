@@ -24,6 +24,10 @@ namespace saucats {
 		inline SegmentSDF(const segment_type& segment)
 			: m_segment(segment) { }
 
+		inline const segment_type& segment() const {
+			return m_segment;
+		}
+
 		template <typename InVectorT>
 		inline typename InVectorT::Scalar
 		dist(const InVectorT& X) const {
