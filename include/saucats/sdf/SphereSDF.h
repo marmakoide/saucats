@@ -33,7 +33,7 @@ namespace saucats {
 			return (m_sphere.center() - X).norm() - m_radius;
 		}
 
-		inline sphere_type bounding_sphere() const {
+		inline sphere_type get_bounding_sphere() const {
 			return get_bounding_sphere(m_sphere);
 		}
 
