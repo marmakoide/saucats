@@ -38,7 +38,7 @@ namespace saucats {
 			return m_func.dist(X) + m_offset;
 		}
 	
-		inline sphere_type bounding_sphere() const {
+		inline sphere_type get_bounding_sphere() const {
 			sphere_type bsphere = m_func.get_bounding_sphere();
 			return sphere_type(bsphere.center(), bsphere.radius() - m_offset);
 		}
