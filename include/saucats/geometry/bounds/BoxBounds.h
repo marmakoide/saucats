@@ -18,7 +18,7 @@ namespace saucats {
 	template <class VectorT>
 	SphereT<VectorT>
 	get_bounding_sphere(const BoxT<VectorT>& box) {
-		return SphereT<VectorT>(box.half_extent().norm(), box.center());
+		return SphereT<VectorT>(box.center(), box.half_extent().norm());
 	}
 } // namespace saucats
 
