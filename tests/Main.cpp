@@ -95,7 +95,7 @@ sphere_volume_check() {
 	// Setup a unit sphere
 	SphereT<VectorT> S(1.);
 	auto sdf = get_sphere_sdf(S);
-	auto bound_box = get_bounding_box(sdf.bounding_sphere());
+	auto bound_box = get_bounding_box(sdf.get_bounding_sphere());
 
 	// Estimate the volume with Monte-Carlo integration
 	const unsigned int sample_count = 10000000;
