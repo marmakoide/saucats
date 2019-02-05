@@ -1,5 +1,5 @@
-#ifndef SAUCATS_RENDER_RENDERER_TARGET_H
-#define SAUCATS_RENDER_RENDERER_TARGET_H
+#ifndef SAUCATS_RENDER_RENDERER_T_H
+#define SAUCATS_RENDER_RENDERER_T_H
 
 #include <saucats/utils/StopWatch.h>
 
@@ -88,4 +88,4 @@ namespace saucats {
 
 
 
-#endif // SAUCATS_RENDER_RENDERER_TARGET_H
+#endif // SAUCATS_RENDER_RENDERER_T_H
