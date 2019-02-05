@@ -34,7 +34,7 @@ namespace saucats {
 		}
 
 		inline sphere_type get_bounding_sphere() const {
-			return get_bounding_sphere(m_sphere);
+			return m_sphere;
 		}
 
 	private:
