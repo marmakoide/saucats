@@ -37,7 +37,7 @@ namespace saucats {
 			return std::sqrt(U.squaredNorm() + k * (k - 2 * x));				
 		}
 
-		inline sphere_type bounding_sphere() const {
+		inline sphere_type get_bounding_sphere() const {
 			return sphere_type(m_segment.line().origin(), m_segment.half_length());
 		}
 
