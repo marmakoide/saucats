@@ -2,7 +2,9 @@
 
 #include <saucats/Geometry>
 #include <saucats/Macros>
+#include <saucats/Render>
 #include <saucats/SDF>
+
 #include <saucats/utils/ArrayT.h>
 
 #include <random>

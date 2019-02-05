@@ -63,7 +63,7 @@ def build(context):
 	# Specify what to install
 	context.install_files(
 		'${PREFIX}',
-		context.path.ant_glob('include/saucats/**/*.h') + ['include/saucats/Geometry', 'include/saucats/Macros', 'include/saucats/SDF'],
+		context.path.ant_glob('include/saucats/**/*.h') + ['include/saucats/Geometry', 'include/saucats/Macros', 'include/saucats/Render', 'include/saucats/SDF'],
 		relative_trick = True
 	)
 
