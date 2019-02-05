@@ -6,7 +6,35 @@
 
 
 namespace saucats {
-template <class color_array_type, class interpolation_type>
+	/*
+	 * Interpolation operators
+	 */
+
+	template <class interpolant_type>
+	struct NearestNeighbourInterpolation {
+	inline interpolant_type operator () (double k,
+	    	                               const interpolant_type& a,
+	    	                               const interpolant_type& b) const {
+			if (k < .5)
+				return a;
+			return b;
+		}
+	}; // struct NearestNeighbourInterpolation
+
+
+
+	template <class interpolant_type>
+	struct LinearInterpolation {
+		inline interpolant_type operator () (double k,
+		                                     const interpolant_type& a,
+		                                     const interpolant_type& b) const {
+			return (1. - k) * a + k * b;
+		}
+	}; // struct LinearInterpolation
+
+
+
+	template <class color_array_type, class interpolation_type>
 	class ColorRamp {
 	public:
 		typedef typename color_array_type::Scalar scalar_type;

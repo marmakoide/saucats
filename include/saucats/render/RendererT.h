@@ -81,7 +81,8 @@ namespace saucats {
 	// Helper function to get an instance of a renderer
 	template <class shader_type, class target_type>
 	RendererT<shader_type, target_type>
-	get_renderer(const shader_type& shader, target_type& target) {
+	get_renderer(const shader_type& shader,
+	             target_type& target) {
 		return RendererT<shader_type, target_type>(shader, target);
 	}
 } // namespace saucats

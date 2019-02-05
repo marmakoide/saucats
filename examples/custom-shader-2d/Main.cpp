@@ -7,6 +7,10 @@ using namespace saucats;
 
 
 
+/*
+ * A shader showing a shape using two colors, background and foreground
+ */
+
 template <class func_type>
 class Shader {
 public:

@@ -5,6 +5,7 @@
 
 #include <saucats/render/ColorMap.h>
 #include <saucats/render/ColorRamp.h>
+#include <saucats/render/DistField2dShader.h>
 #include <saucats/render/PNGRenderTarget.h>
 #include <saucats/render/RendererT.h>
 

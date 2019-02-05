@@ -31,3 +31,10 @@ def build(context):
 		use    = ['saucats', 'png', 'eigen']
 	)
 
+	context.program(
+		target = 'saucats-polygon-dist-field-render',
+		source = context.path.ant_glob('polygon-dist-field-render/*.cpp'),
+		lib    = ['m'],
+		use    = ['saucats', 'png', 'eigen']
+	)
+

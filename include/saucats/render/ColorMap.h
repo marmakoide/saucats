@@ -41,6 +41,7 @@ namespace saucats {
 
 
 	typedef ColorMap<float> ColorMapf;
+	typedef ColorMap<double> ColorMapd;
 } // namespace saucats
 
 
