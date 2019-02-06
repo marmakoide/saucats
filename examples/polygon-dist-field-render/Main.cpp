@@ -10,7 +10,29 @@ using namespace saucats;
 int
 main(int UNUSED_PARAM(argc), char** UNUSED_PARAM(argv)) {
 	// Setup the distance field
-	auto sdf = get_box_sdf(Box2d(Eigen::Vector2d(1., 1.)));
+	Eigen::Matrix<double, Eigen::Dynamic, 2> vertex_array(8, 2);
+	vertex_array <<
+		 1.,  1.,
+		-1.,  1.,
+		-2., -1.,
+		-1., -1.,
+		-1.,  0.,
+		 1.,  0.,
+		 1., -1.,
+		 2., -1.;
+
+	Eigen::Matrix<Eigen::Index, Eigen::Dynamic, 2> edge_array(8, 2);
+	edge_array <<
+		0, 1,
+		1, 2,
+		2, 3,
+		3, 4,
+		4, 5,
+		5, 6,
+		6, 7,
+		7, 0;
+
+	auto sdf = get_polygon_sdf(vertex_array, edge_array);
 
 	// Setup the render target
 	PNGRenderTarget render_target(256, 256, "out.png");
