@@ -15,10 +15,10 @@ main(int UNUSED_PARAM(argc), char** UNUSED_PARAM(argv)) {
 		 1.,  1.,
 		-1.,  1.,
 		-2., -1.,
-		-1., -1.,
-		-1.,  0.,
-		 1.,  0.,
-		 1., -1.,
+		-.5, -1.,
+		-.5,  0.,
+		 .5,  0.,
+		 .5, -1.,
 		 2., -1.;
 
 	Eigen::Matrix<Eigen::Index, Eigen::Dynamic, 2> edge_array(8, 2);
