@@ -11,14 +11,14 @@ namespace saucats {
 	/*
 	 Euclidean signed distance to a 2d polygon
 	 */
-	template <class VectorT>
+	template <class ScalarT>
 	class PolygonSDF {
 	public:
-		typedef typename VectorT::Scalar scalar_type;
-		typedef VectorT vector_type;
-		typedef SegmentT<VectorT> segment_type;
-		typedef SegmentSDF<VectorT> segment_sdf_type;
-		typedef SphereT<VectorT> sphere_type;
+		typedef ScalarT scalar_type;
+		typedef Eigen::Matrix<scalar_type, 2, 1> vector_type;
+		typedef SegmentT<vector_type> segment_type;
+		typedef SegmentSDF<vector_type> segment_sdf_type;
+		typedef SphereT<vector_type> sphere_type;
 
 		typedef Eigen::Matrix<scalar_type, Eigen::Dynamic, 2> vertex_array_type;
 		typedef Eigen::Matrix<Eigen::Index, Eigen::Dynamic, 2> edge_array_type;
@@ -33,7 +33,13 @@ namespace saucats {
 				m_segment_sdf_array[i] = segment_sdf_type(segment_type::from_2_points(vertex_array.row(edge_array(i, 0)), vertex_array.row(edge_array(i, 1))));
 
 			// Compute the bounding disc
-			m_bounding_sphere = point_collection::get_bounding_sphere(vertex_array.rowwise().begin(), vertex_array.rowwise().end());
+			// TODO : soon-to-be-release version of Eigen will interface directly with STL routines
+			//m_bounding_sphere = point_collection::get_bounding_sphere(vertex_array.rowwise().begin(), vertex_array.rowwise().end());
+
+			std::vector<vector_type> points(vertex_array.size());
+			for(Eigen::Index i = 0; i < vertex_array.rows(); ++i)
+				points[i] = vertex_array.row(i);
+			m_bounding_sphere = point_collection::get_bounding_sphere(points.begin(), points.end());
 		}
 		
 
@@ -41,13 +47,11 @@ namespace saucats {
 		template <typename InVectorT>
 		inline typename InVectorT::Scalar
 		dist(const InVectorT& X) const {
-			double dist = 
-				std::accumulate(std::next(m_segment_sdf_array.begin()), m_segment_sdf_array.end(),
-				                std::fabs(m_segment_sdf_array.begin()->dist(X)),
-				                [&X] (const segment_sdf_type& sdf, scalar_type min_dist) {
-													return std::min(min_dist, std::fabs(sdf.dist(X)));
-												});
-			
+			auto seg_it = m_segment_sdf_array.begin();
+			scalar_type dist = std::fabs(seg_it->dist(X));
+			for(++seg_it; seg_it != m_segment_sdf_array.end(); ++seg_it)
+				dist = std::min(dist, std::fabs(seg_it->dist(X)));
+
 			if (is_inside(X))
 				dist = -dist;
 
@@ -73,14 +77,18 @@ namespace saucats {
 				vector_type U = (2 * seg.half_length()) * seg.line().direction();
 
 				if (A.y() <= P.y()) {
-					if (B.y() > P.y())
-						if (U.cross(P - A) > 0)
+					if (B.y() > P.y()) {
+						vector_type V = P - A;
+						if (U.x() * V.y() - U.y() * V.x() > 0)
 							winding_number += 1;
+					}
 				}
 				else {
-				if (B.y() <= P.y())
-						if (U.cross(P - A) < 0)
+					if (B.y() <= P.y()) {
+						vector_type V = P - A;
+						if (U.x() * V.y() - U.y() * V.x() < 0)
 							winding_number -= 1;
+					}
 				}
 			}
 			
@@ -96,10 +104,11 @@ namespace saucats {
 
 
 
-	template <class VectorT>
-	PolygonSDF<VectorT>
-	get_polygon_sdf(const BoxT<VectorT>& box) {
-		return PolygonSDF<VectorT>(box);
+	template <class ScalarT>
+	PolygonSDF<ScalarT>
+	get_polygon_sdf(const Eigen::Matrix<ScalarT, Eigen::Dynamic, 2>& vertex_array,
+	                const Eigen::Matrix<Eigen::Index, Eigen::Dynamic, 2>& edge_array) {
+		return PolygonSDF<ScalarT>(vertex_array, edge_array);
 	}
 } // namespace saucats
 
