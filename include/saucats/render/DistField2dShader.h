@@ -23,7 +23,7 @@ namespace saucats {
 			m_shader(shader) {
 			auto bounding_sphere = func.get_bounding_sphere();
 			m_center = bounding_sphere.center();
-			m_scale = Eigen::Vector2d(2.5 * bounding_sphere.radius(), 2.5 * bounding_sphere.radius());
+			m_scale = Eigen::Vector2d(2.5 * bounding_sphere.radius(), -2.5 * bounding_sphere.radius());
 		}
 
 		inline uv_coord_type& center() {
