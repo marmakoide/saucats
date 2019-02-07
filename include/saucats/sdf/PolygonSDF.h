@@ -72,20 +72,19 @@ namespace saucats {
 			for(const segment_sdf_type& seg_sdf : m_segment_sdf_array) {
 				const segment_type& seg = seg_sdf.segment();
 
-				vector_type A = seg.line().point(-seg.half_length());
-				vector_type B = seg.line().point( seg.half_length());
-				vector_type U = (2 * seg.half_length()) * seg.line().direction();
+				const vector_type& U = seg.line().direction();
+				scalar_type ly = seg.half_length() * U.y();
 
-				if (A.y() <= P.y()) {
-					if (B.y() > P.y()) {
-						vector_type V = P - A;
+				if (-ly <= P.y() - seg.line().origin().y()) {
+					if (ly > P.y() - seg.line().origin().y()) {
+						vector_type V = P - seg.line().point(-seg.half_length());
 						if (U.x() * V.y() - U.y() * V.x() > 0)
 							winding_number += 1;
 					}
 				}
 				else {
-					if (B.y() <= P.y()) {
-						vector_type V = P - A;
+					if (ly <= P.y() - seg.line().origin().y()) {
+						vector_type V = P - seg.line().point(-seg.half_length());
 						if (U.x() * V.y() - U.y() * V.x() < 0)
 							winding_number -= 1;
 					}
