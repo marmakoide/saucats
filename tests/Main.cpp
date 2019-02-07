@@ -199,6 +199,54 @@ smallest_bounding_sphere_check() {
 
 
 
+// --- Polygon distance field test --------------------------------------------
+
+int
+square_polygon_rasterization_check() {
+	std::default_random_engine rng;
+
+	// Setup the distance fields
+	Eigen::Matrix<double, Eigen::Dynamic, 2> vertex_array(4, 2);
+	vertex_array <<
+		 1.,  1.,
+		-1.,  1.,
+		-1., -1.,
+		 1., -1.;
+
+	Eigen::Matrix<Eigen::Index, Eigen::Dynamic, 2> edge_array(4, 2);
+	edge_array <<
+		0, 1,
+		1, 2,
+		2, 3,
+		3, 0;
+
+	auto sdf_a = get_polygon_sdf(vertex_array, edge_array);
+	auto sdf_b = get_box_sdf(Box2d(Eigen::Vector2d(2., 2.)));
+
+	// Check that the bounding spheres match
+	auto sphere_a = sdf_a.get_bounding_sphere();
+	auto sphere_b = sdf_b.get_bounding_sphere();
+
+	mu_assert(std::fabs(sphere_a.radius() - sphere_b.radius()) <= 1e-3, "wrong bounding sphere radius");
+	mu_assert((sphere_a.center() - sphere_b.center()).squaredNorm() <= 1e-5, "wrong bounding sphere center");	
+
+	// Check that the distance functions match for random sample
+	auto sampler = get_sphere_volume_sampler(sdf_a.get_bounding_sphere());
+	for(unsigned int i = 0; i < 1024; ++i) {
+		auto P = sampler.get_sample(rng);
+
+		auto da = sdf_a.dist(P);
+		auto db = sdf_b.dist(P);
+
+		mu_assert(std::fabs(da - db) < 1e-3, "wrong signed distance value");
+	}
+
+	// Job done
+	return 0;
+}
+
+
+
 // --- Entry point ------------------------------------------------------------
 
 int
@@ -238,6 +286,9 @@ all_tests() {
 	mu_run_test(smallest_bounding_sphere_check<Eigen::Vector2d>);
 	mu_run_test(smallest_bounding_sphere_check<Eigen::Vector3d>);
 	mu_run_test(smallest_bounding_sphere_check<Eigen::Vector4d>);
+
+	// Polygon distance field test
+	mu_run_test(square_polygon_rasterization_check);
 
 	// Job done
 	return 0;
