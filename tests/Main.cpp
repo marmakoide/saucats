@@ -213,14 +213,7 @@ square_polygon_rasterization_check() {
 		-1., -1.,
 		 1., -1.;
 
-	Eigen::Matrix<Eigen::Index, Eigen::Dynamic, 2> edge_array(4, 2);
-	edge_array <<
-		0, 1,
-		1, 2,
-		2, 3,
-		3, 0;
-
-	auto sdf_a = get_polygon_sdf(vertex_array, edge_array);
+	auto sdf_a = get_polygon_sdf(vertex_array);
 	auto sdf_b = get_box_sdf(Box2d(Eigen::Vector2d(2., 2.)));
 
 	// Check that the bounding spheres match

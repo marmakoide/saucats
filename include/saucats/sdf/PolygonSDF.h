@@ -110,6 +110,22 @@ namespace saucats {
 	                const Eigen::Matrix<Eigen::Index, Eigen::Dynamic, 2>& edge_array) {
 		return PolygonSDF<ScalarT>(vertex_array, edge_array);
 	}
+
+
+	template <class ScalarT>
+	PolygonSDF<ScalarT>
+	get_polygon_sdf(const Eigen::Matrix<ScalarT, Eigen::Dynamic, 2>& vertex_array) {
+		Eigen::Matrix<Eigen::Index, Eigen::Dynamic, 2> edge_array(vertex_array.rows(), 2);
+		for(Eigen::Index i = 0; i < vertex_array.rows() - 1; ++i) {
+			edge_array.coeffRef(i, 0) = i;
+			edge_array.coeffRef(i, 1) = i + 1;
+		}
+		edge_array.coeffRef(vertex_array.rows() - 1, 0) = vertex_array.rows() - 1;
+		edge_array.coeffRef(vertex_array.rows() - 1, 1) = 0;
+
+
+		return PolygonSDF<ScalarT>(vertex_array, edge_array);
+	}
 } // namespace saucats
 
 

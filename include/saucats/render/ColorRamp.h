@@ -103,9 +103,46 @@ namespace saucats {
 
 	template <class color_ramp_type>
 	AbsColorRamp<color_ramp_type>
-	abs_color_ramp(const color_ramp_type& color_ramp) {
+	get_abs_color_ramp(const color_ramp_type& color_ramp) {
 		return AbsColorRamp<color_ramp_type>(color_ramp);
 	}
+
+
+
+	// --- SignedColorRamp --------------------------------------------------------
+
+	template <class color_ramp_type>
+	class SignedColorRamp {
+	public:
+		typedef typename color_ramp_type::scalar_type scalar_type;
+		typedef typename color_ramp_type::color_type color_type;
+
+		SignedColorRamp(const color_ramp_type& A,
+		                const color_ramp_type& B) : 
+			m_A(A),
+			m_B(B) { }
+
+		inline color_type get_color(scalar_type u) const {
+			if (u < 0)
+				return m_A.get_color(-u);
+
+			return m_B.get_color(u);
+		}
+
+	private:
+		color_ramp_type m_A;
+		color_ramp_type m_B;
+	}; // class SignedRampMap
+
+
+
+	template <class color_ramp_type>
+	SignedColorRamp<color_ramp_type>
+	get_signed_color_ramp(const color_ramp_type& A,
+	                      const color_ramp_type& B) {
+		return SignedColorRamp<color_ramp_type>(A, B);
+	}
+
 } // namespace saucats
 
 
