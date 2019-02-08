@@ -61,7 +61,7 @@ namespace saucats {
 
 		VectorT diff = sphere.center() - line.origin();
 		scalar_type t = line.direction().dot(diff);
-		scalar_type d_sqr = sphere.radius_sqr() - diff.squaredNorm() + t * t;
+		scalar_type d_sqr = sphere.squared_radius() - diff.squaredNorm() + t * t;
 		if (d_sqr < 0.)
 			return SphereLineIntersectionT<VectorT>();
 

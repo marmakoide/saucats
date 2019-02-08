@@ -11,6 +11,7 @@
 #include <saucats/sdf/SphereSDF.h>
 
 #include <saucats/sdf/utils/Gradient.h>
+#include <saucats/sdf/utils/Intersection.h>
 
 
 
