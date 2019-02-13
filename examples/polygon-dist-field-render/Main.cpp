@@ -24,18 +24,6 @@ main(int UNUSED_PARAM(argc), char** UNUSED_PARAM(argv)) {
 		 5., 2.,
 		 5., 0.,
      0., 0.;
-	/*
-	Eigen::Matrix<double, Eigen::Dynamic, 2> vertex_array(8, 2);
-	vertex_array <<
-		 1.,  1.,
-		-1.,  1.,
-		-2., -1.,
-		-.5, -1.,
-		-.5,  0.,
-		 .5,  0.,
-		 .5, -1.,
-		 2., -1.;
-	*/
 
 	auto sdf = get_polygon_sdf(vertex_array);
 
