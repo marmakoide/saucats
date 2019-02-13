@@ -10,6 +10,21 @@ using namespace saucats;
 int
 main(int UNUSED_PARAM(argc), char** UNUSED_PARAM(argv)) {
 	// Setup the distance field
+	Eigen::Matrix<double, Eigen::Dynamic, 2> vertex_array(12, 2);
+	vertex_array <<
+		 0., 2.,
+		 1., 2.,
+		 1., 1.,
+		 2., 1.,
+		 2., 2.,
+		 3., 2.,
+		 3., 1.,
+		 4., 1.,
+		 4., 2.,
+		 5., 2.,
+		 5., 0.,
+     0., 0.;
+	/*
 	Eigen::Matrix<double, Eigen::Dynamic, 2> vertex_array(8, 2);
 	vertex_array <<
 		 1.,  1.,
@@ -20,6 +35,7 @@ main(int UNUSED_PARAM(argc), char** UNUSED_PARAM(argv)) {
 		 .5,  0.,
 		 .5, -1.,
 		 2., -1.;
+	*/
 
 	auto sdf = get_polygon_sdf(vertex_array);
 

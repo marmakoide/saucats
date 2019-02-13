@@ -36,7 +36,7 @@ namespace saucats {
 			// TODO : soon-to-be-release version of Eigen will interface directly with STL routines
 			//m_bounding_sphere = point_collection::get_bounding_sphere(vertex_array.rowwise().begin(), vertex_array.rowwise().end());
 
-			std::vector<vector_type> points(vertex_array.size());
+			std::vector<vector_type> points(vertex_array.rows());
 			for(Eigen::Index i = 0; i < vertex_array.rows(); ++i)
 				points[i] = vertex_array.row(i);
 			m_bounding_sphere = point_collection::get_bounding_sphere(points.begin(), points.end());
