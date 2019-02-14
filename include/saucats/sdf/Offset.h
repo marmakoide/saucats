@@ -20,7 +20,8 @@ namespace saucats {
 
 
 
-		SDFOffset(const func_type& func, scalar_type offset) :
+		SDFOffset(const func_type& func,
+		          scalar_type offset) :
 			m_func(func),
 			m_offset(offset) { }
 
@@ -52,8 +53,8 @@ namespace saucats {
  
 	template <class func_type>
 	SDFOffset<func_type>
-	offset(const func_type& func,
-	       typename func_type::scalar_type offset) {
+	get_sdf_offset(const func_type& func,
+	               typename func_type::scalar_type offset) {
 		return SDFOffset<func_type>(func, offset);
 	}
 } // namespace saucats
