@@ -38,6 +38,26 @@ namespace saucats {
 		}
 
 		static color_array_type&
+		get_PiYG_map() {
+			static color_array_type ret = 
+			(Eigen::Matrix<scalar_type, 11, 3>() <<
+				0.556, 0.004, 0.321,
+				0.772, 0.105, 0.490,
+				0.870, 0.466, 0.682,
+				0.945, 0.713, 0.854,
+				0.992, 0.878, 0.937,
+				0.968, 0.968, 0.968,
+				0.901, 0.960, 0.815,
+				0.721, 0.882, 0.525,
+				0.498, 0.737, 0.254,
+				0.301, 0.572, 0.129,
+				0.152, 0.392, 0.098
+			).finished();
+
+			return ret;
+		}
+
+		static color_array_type&
 		get_Blues_map() {
 			static color_array_type ret = 
 			(Eigen::Matrix<scalar_type, 9, 3>() <<
