@@ -15,8 +15,8 @@ namespace saucats {
 	public:
 		typedef typename VectorT::Scalar scalar_type;
 		typedef VectorT vector_type;
-		typedef SegmentT<VectorT> segment_type;
-		typedef SphereT<VectorT> sphere_type;
+		typedef SegmentT<vector_type> segment_type;
+		typedef SphereT<vector_type> sphere_type;
 
 
 		inline SegmentSDF() { }
@@ -31,10 +31,16 @@ namespace saucats {
 		template <typename InVectorT>
 		inline typename InVectorT::Scalar
 		dist(const InVectorT& X) const {
+			return std::sqrt(squared_dist(X));				
+		}
+
+		template <typename InVectorT>
+		inline typename InVectorT::Scalar
+		squared_dist(const InVectorT& X) const {
 			InVectorT U = X - m_segment.line().origin();
 			typename InVectorT::Scalar x = m_segment.line().direction().dot(U);
 			typename InVectorT::Scalar k = std::copysign(std::min(std::fabs(x), m_segment.half_length()), x);
-			return std::sqrt(U.squaredNorm() + k * (k - 2 * x));				
+			return U.squaredNorm() + k * (k - 2 * x);				
 		}
 
 		inline sphere_type get_bounding_sphere() const {
