@@ -1,5 +1,5 @@
-#ifndef SAUCATS_SDF_POLYGON_SDF_H
-#define SAUCATS_SDF_POLYGON_SDF_H
+#ifndef SAUCATS_SDF_POLYGON2_SDF_H
+#define SAUCATS_SDF_POLYGON2_SDF_H
 
 #include <saucats/utils/ArrayT.h>
 #include <saucats/sdf/SegmentSDF.h>
@@ -12,7 +12,7 @@ namespace saucats {
 	 Euclidean signed distance to a 2d polygon
 	 */
 	template <class ScalarT>
-	class PolygonSDF {
+	class Polygon2SDF {
 	public:
 		typedef ScalarT scalar_type;
 		typedef Eigen::Matrix<scalar_type, 2, 1> vector_type;
@@ -25,8 +25,8 @@ namespace saucats {
 
 
 		
-		inline PolygonSDF(const vertex_array_type& vertex_array,
-		                  const edge_array_type& edge_array) :
+		Polygon2SDF(const vertex_array_type& vertex_array,
+		            const edge_array_type& edge_array) :
 			m_segment_sdf_array(edge_array.rows()) {
 			// Compute the segments
 			for(Eigen::Index i = 0; i < edge_array.rows(); ++i)
@@ -99,21 +99,21 @@ namespace saucats {
 
 		sphere_type m_bounding_sphere;
 		ArrayT<segment_sdf_type> m_segment_sdf_array;
-	}; // class PolygonSDF
+	}; // class Polygon2SDF
 
 
 
 	template <class ScalarT>
-	PolygonSDF<ScalarT>
-	get_polygon_sdf(const Eigen::Matrix<ScalarT, Eigen::Dynamic, 2>& vertex_array,
+	Polygon2SDF<ScalarT>
+	get_polygon2_sdf(const Eigen::Matrix<ScalarT, Eigen::Dynamic, 2>& vertex_array,
 	                const Eigen::Matrix<Eigen::Index, Eigen::Dynamic, 2>& edge_array) {
-		return PolygonSDF<ScalarT>(vertex_array, edge_array);
+		return Polygon2SDF<ScalarT>(vertex_array, edge_array);
 	}
 
 
 	template <class ScalarT>
-	PolygonSDF<ScalarT>
-	get_polygon_sdf(const Eigen::Matrix<ScalarT, Eigen::Dynamic, 2>& vertex_array) {
+	Polygon2SDF<ScalarT>
+	get_polygon2_sdf(const Eigen::Matrix<ScalarT, Eigen::Dynamic, 2>& vertex_array) {
 		Eigen::Matrix<Eigen::Index, Eigen::Dynamic, 2> edge_array(vertex_array.rows(), 2);
 		for(Eigen::Index i = 0; i < vertex_array.rows() - 1; ++i) {
 			edge_array.coeffRef(i, 0) = i;
@@ -123,10 +123,10 @@ namespace saucats {
 		edge_array.coeffRef(vertex_array.rows() - 1, 1) = 0;
 
 
-		return PolygonSDF<ScalarT>(vertex_array, edge_array);
+		return Polygon2SDF<ScalarT>(vertex_array, edge_array);
 	}
 } // namespace saucats
 
 
 
-#endif // SAUCATS_SDF_POLYGON_SDF_H
+#endif // SAUCATS_SDF_POLYGON2_SDF_H
