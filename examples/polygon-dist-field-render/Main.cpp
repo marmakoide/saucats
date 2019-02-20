@@ -25,7 +25,7 @@ main(int UNUSED_PARAM(argc), char** UNUSED_PARAM(argv)) {
 		 5., 0.,
      0., 0.;
 
-	auto sdf = get_polygon_sdf(vertex_array);
+	auto sdf = get_polygon2_sdf(vertex_array);
 
 	// Setup the render target
 	PNGRenderTarget render_target(256, 256, "out.png");
