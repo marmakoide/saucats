@@ -28,7 +28,7 @@ main(int UNUSED_PARAM(argc), char** UNUSED_PARAM(argv)) {
 	auto sdf = get_polygon2_sdf(vertex_array);
 
 	// Setup the render target
-	PNGRenderTarget render_target(256, 256, "out.png");
+	PNGRenderTarget render_target("out.png", 256, 256);
 
 	// Setup the shader
 	auto color_ramp =

@@ -13,7 +13,7 @@ main(int UNUSED_PARAM(argc), char** UNUSED_PARAM(argv)) {
 	auto sdf = get_sdf_offset(get_circle_sdf(Circle3d(1.)), -.2);
 
 	// Setup the render target
-	PNGRenderTarget render_target(256, 256, "out.png");
+	PNGRenderTarget render_target("out.png", 256, 256);
 
 	// Setup the shader
 	PerspectiveProjection projection;

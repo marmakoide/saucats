@@ -55,7 +55,7 @@ main(int UNUSED_PARAM(argc), char** UNUSED_PARAM(argv)) {
 	auto sdf = get_sphere_sdf(Sphere2d(1.));
 
 	// Setup the render target
-	PNGRenderTarget render_target(256, 256, "out.png");
+	PNGRenderTarget render_target("out.png", 256, 256);
 
 	// Setup the shader
 	auto shader = get_shader(sdf);

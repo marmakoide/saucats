@@ -37,7 +37,8 @@ namespace saucats {
 
 
 
-		inline PNGRenderTarget(int w, int h, const std::string& path) :
+		inline PNGRenderTarget(const std::string& path,
+		                       int w, int h) :
 			m_w(w),
 			m_h(h),
 			m_path(path),
