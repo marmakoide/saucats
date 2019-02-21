@@ -21,7 +21,7 @@ main(int UNUSED_PARAM(argc), char** UNUSED_PARAM(argv)) {
 	projection.eye_pos() = bound_sphere.center() + Eigen::Vector3d(0., 0., -1.5 * bound_sphere.radius());
 
 	auto frag_shader = get_phong_fragment_shader();
-	auto bg_shader = get_color_ramp_shader(get_color_ramp(ColorMapd::get_Blues_map(), LinearInterpolation<Eigen::Vector3d>()), 1., .5);
+	auto bg_shader = get_color_ramp_shader(get_color_ramp(ColorMapd::get_Blues_map(), LinearInterpolation()), 1., .5);
 	auto shader = get_isosurface_3d_shader(sdf, frag_shader, bg_shader, projection);
 
 	// Render the distance field

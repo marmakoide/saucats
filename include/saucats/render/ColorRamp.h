@@ -10,11 +10,11 @@ namespace saucats {
 	 * Interpolation operators
 	 */
 
-	template <class interpolant_type>
 	struct NearestNeighbourInterpolation {
-	inline interpolant_type operator () (double k,
-	    	                               const interpolant_type& a,
-	    	                               const interpolant_type& b) const {
+		template <class interpolant_type>
+		inline interpolant_type operator () (double k,
+		    	                               const interpolant_type& a,
+		    	                               const interpolant_type& b) const {
 			if (k < .5)
 				return a;
 			return b;
@@ -23,8 +23,8 @@ namespace saucats {
 
 
 
-	template <class interpolant_type>
 	struct LinearInterpolation {
+		template <class interpolant_type>		
 		inline interpolant_type operator () (double k,
 		                                     const interpolant_type& a,
 		                                     const interpolant_type& b) const {
@@ -57,8 +57,8 @@ namespace saucats {
 			Eigen::Index i = (Eigen::Index)v_int;
 			return
 				m_interpolation(v_frac,
-				                m_color_array.row(i),
-				                m_color_array.row(i+1));
+				                m_color_array.row(i).eval(),
+				                m_color_array.row(i+1).eval());
 		}
 
 	private:

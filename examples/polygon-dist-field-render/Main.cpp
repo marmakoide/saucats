@@ -32,8 +32,8 @@ main(int UNUSED_PARAM(argc), char** UNUSED_PARAM(argv)) {
 
 	// Setup the shader
 	auto color_ramp =
-		get_signed_color_ramp(get_color_ramp(ColorMapd::get_Blues_map(), LinearInterpolation<Eigen::Vector3d>()),
-		                      get_color_ramp(ColorMapd::get_Oranges_map(), LinearInterpolation<Eigen::Vector3d>()) );
+		get_signed_color_ramp(get_color_ramp(ColorMapd::get_Blues_map(), LinearInterpolation()),
+		                      get_color_ramp(ColorMapd::get_Oranges_map(), LinearInterpolation()) );
 	auto dist_shader = get_color_ramp_dist_shader(color_ramp);
 	auto shader = get_dist_field_2d_shader(sdf, dist_shader);
 
