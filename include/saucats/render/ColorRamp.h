@@ -75,8 +75,12 @@ namespace saucats {
 		return ColorRamp<color_array_type, interpolation_type>(color_array, interpolation);
 	}	
 
-
-
+	template <class color_array_type>
+	ColorRamp<color_array_type, LinearInterpolation>
+	get_color_ramp(const color_array_type& color_array) {
+		LinearInterpolation interpolation;
+		return ColorRamp<color_array_type, LinearInterpolation>(color_array, interpolation);
+	}	
 
 
 
