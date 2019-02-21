@@ -5,8 +5,11 @@
 
 namespace saucats {
 	/*
-	 * Implements a shader for 2d signed distance field, that automatically
-	 * scale and center on the shape.
+	 * Implements a shader for 2d signed distance field. It renders each pixel
+	 * as a function of the distance.
+	 *
+	 * When initialized, the view is automatically scaled and centered to show the 
+	 * shape.
 	 */
 
 	template <class func_type, class dist_shader_type>

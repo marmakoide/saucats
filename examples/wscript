@@ -38,3 +38,10 @@ def build(context):
 		use    = ['saucats', 'png', 'eigen']
 	)
 
+	context.program(
+		target = 'saucats-torus-render',
+		source = context.path.ant_glob('torus-render/*.cpp'),
+		lib    = ['m'],
+		use    = ['saucats', 'png', 'eigen']
+	)
+
