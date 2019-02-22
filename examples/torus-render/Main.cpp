@@ -10,7 +10,12 @@ using namespace saucats;
 int
 main(int UNUSED_PARAM(argc), char** UNUSED_PARAM(argv)) {
 	// Setup the distance field
-	auto sdf = get_sdf_offset(get_circle_sdf(Circle3d(1.)), -.2);
+	auto sdf = get_sdf_offset(
+		get_sdf_rotation3(
+			get_circle_sdf(Circle3d(1.)),
+			Eigen::AngleAxisd(M_PI / 3., Eigen::Vector3d(0., -1., 0.))
+		), 
+	-.2);
 
 	// Setup the render target
 	PNGRenderTarget render_target("out.png", 256, 256);
