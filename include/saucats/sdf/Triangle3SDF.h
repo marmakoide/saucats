@@ -1,7 +1,7 @@
 #ifndef SAUCATS_SDF_TRIANGLE3_SDF_H
 #define SAUCATS_SDF_TRIANGLE3_SDF_H
 
-#include <array>
+#include <vector>
 #include <saucats/sdf/SegmentSDF.h>
 
 
@@ -31,16 +31,19 @@ namespace saucats {
 			M.col(0) = B - A;
 			M.col(1) = C - A;
 			M.col(2) = m_N;
-			M = M.inverse();
-			m_M.row(0) = M.row(0);
-			m_M.row(1) = M.row(1);
+			Eigen::Matrix<scalar_type, 3, 3> M_inv = M.inverse();
+			m_M.row(0) = M_inv.row(0);
+			m_M.row(1) = M_inv.row(1);
 
 			m_U = get_segment_sdf(segment_type::from_2_points(A, B));
 			m_V = get_segment_sdf(segment_type::from_2_points(B, C));
 			m_W = get_segment_sdf(segment_type::from_2_points(C, A));
 
 			// Compute the circumpsphere
-			std::array<vector_type, 3> triplet = { A, B, C };
+			std::vector<vector_type> triplet(3);
+			triplet[0] = A;
+			triplet[1] = B;
+			triplet[2] = C;
 			m_circumsphere = get_circumsphere(triplet.begin(), triplet.end());
 		}
 
@@ -49,7 +52,8 @@ namespace saucats {
 		dist(const InVectorT& X) const {
 			// Check if X projected on the triangle plane is inside the triangle
 			vector_type P = X - m_A;
-			if (m_M.dot(P).sum() < 1)
+			auto K = (m_M * P).eval();
+			if ((K.x() + K.y() < 1) and (K.x() > 0) and (K.y() > 0))
 				return std::fabs(m_N.dot(P));
 
 			// Return distance to the closest edge
@@ -70,6 +74,16 @@ namespace saucats {
 
 		sphere_type m_circumsphere; // Circumsphere of the triangle
 	}; // class Triangle3SDF
+
+
+
+	template <class scalar_type>
+	Triangle3SDF<scalar_type>
+	get_triangle3_sdf(const Eigen::Matrix<scalar_type, 3, 1>& A,
+		                const Eigen::Matrix<scalar_type, 3, 1>& B,
+		                const Eigen::Matrix<scalar_type, 3, 1>& C) {
+		return Triangle3SDF<scalar_type>(A, B, C);
+	}
 } // namespace saucats
 
 

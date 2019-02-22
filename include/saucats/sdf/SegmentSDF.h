@@ -1,6 +1,7 @@
 #ifndef SAUCATS_SDF_SEGMENT_SDF_H
 #define SAUCATS_SDF_SEGMENT_SDF_H
 
+#include <saucats/geometry/Sphere.h>
 #include <saucats/geometry/Segment.h>
 
 
