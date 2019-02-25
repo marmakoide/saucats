@@ -33,10 +33,6 @@ namespace saucats {
 
 	class PNGRenderTarget {
 	public:
-		typedef Eigen::Vector3d color_type;
-
-
-
 		inline PNGRenderTarget(const std::string& path,
 		                       int w, int h) :
 			m_w(w),
@@ -65,6 +61,7 @@ namespace saucats {
 			return m_h;		
 		}
 
+		template <class color_type>
 		inline void set_pixel(int i, int j, const color_type& color) {
 			// Compute the pixel address
 			std::uint8_t* pixel = (std::uint8_t*)m_pixel_data;
@@ -72,9 +69,9 @@ namespace saucats {
 			pixel += 3 * i;
 
 			// Write the pixel
-			pixel[0] = (std::uint8_t)std::floor(255. * color.x());
-			pixel[1] = (std::uint8_t)std::floor(255. * color.y());
-			pixel[2] = (std::uint8_t)std::floor(255. * color.z());		
+			pixel[0] = (std::uint8_t)std::floor(255. * color.coeff(0));
+			pixel[1] = (std::uint8_t)std::floor(255. * color.coeff(1));
+			pixel[2] = (std::uint8_t)std::floor(255. * color.coeff(2));		
 		}
 
 		inline void start_render() {
