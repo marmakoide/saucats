@@ -7,10 +7,19 @@
 
 
 namespace saucats {
+	template <class ScalarT>
 	class PerspectiveProjection {
 	public:
-		PerspectiveProjection(const Eigen::Vector3d& eye_pos = Eigen::Vector3d::Zero(),
-		                      const Eigen::Matrix3d& head_rot = Eigen::Matrix3d::Identity(),
+		typedef ScalarT scalar_type;
+		typedef Eigen::Matrix<scalar_type, 3, 1> vector_type;
+		typedef Eigen::Matrix<scalar_type, 3, 3> matrix_type;
+		typedef Eigen::Matrix<scalar_type, 2, 1> uv_coord_type;
+		typedef LineT<vector_type> line_type;
+
+
+
+		PerspectiveProjection(const vector_type& eye_pos = vector_type::Zero(),
+		                      const matrix_type& head_rot = matrix_type::Identity(),
 	                        double view_angle = .5 * M_PI) :
 			m_eye_pos(eye_pos),
 			m_head_rot(head_rot),
@@ -21,37 +30,42 @@ namespace saucats {
 			m_head_rot(other.m_head_rot),
 			m_focal_length(other.m_focal_length) { }
 
-		inline Eigen::Vector3d& eye_pos() {
+		inline vector_type& eye_pos() {
 			return m_eye_pos;
 		}
 
-		inline const Eigen::Vector3d& rot() const {
+		inline const vector_type& rot() const {
 			return m_eye_pos;
 		}
 
-		inline Eigen::Matrix3d& head_rot() {
+		inline matrix_type& head_rot() {
 			return m_head_rot;
 		}
 
-		inline const Eigen::Matrix3d& head_rot() const {
+		inline const matrix_type& head_rot() const {
 			return m_head_rot;
 		}
 
-		Line3d get_eye_line(const Eigen::Vector2d& UV) const {
-			Eigen::Vector3d eye_dir(UV.x() - .5, UV.y() - .5, m_focal_length);
+		line_type get_eye_line(const uv_coord_type& UV) const {
+			vector_type eye_dir(UV.x() - scalar_type(.5), UV.y() - scalar_type(.5), m_focal_length);
 			eye_dir = m_head_rot * eye_dir;
-			return Line3d(eye_dir.normalized(), m_eye_pos);
+			return line_type(eye_dir.normalized(), m_eye_pos);
 		}
 
 	private:
-		static double focal_length_from_angle(double angle) {
-			return .5 / std::tan(.5 * angle);
+		static scalar_type focal_length_from_angle(double angle) {
+			return 1 / (2 * std::tan(angle / 2));
 		}
 
-		Eigen::Vector3d m_eye_pos;
-		Eigen::Matrix3d m_head_rot;
-		double m_focal_length;
+		vector_type m_eye_pos;
+		matrix_type m_head_rot;
+		scalar_type m_focal_length;
 	}; // class PerspectiveProjection
+
+
+
+	typedef PerspectiveProjection<float> PerspectiveProjectionf;
+	typedef PerspectiveProjection<double> PerspectiveProjectiond;
 } // namespace saucats
 
 
