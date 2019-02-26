@@ -2,27 +2,32 @@
 #include <saucats/Macros>
 #include <saucats/Render>
 #include <saucats/SDF>
+#include <STLParser.h>
 
+
+using namespace std;
 using namespace saucats;
 
 
 
 int
 main(int UNUSED_PARAM(argc), char** UNUSED_PARAM(argv)) {
+	// Load triangle mesh
+	std::vector<TriMeshSDF<double>::triangle_type> triangle_list;
+	STLParser<double>::load("./data/L-shape.stl", std::back_inserter(triangle_list));
+	
 	// Setup the distance field
-	auto sdf = get_sdf_offset(
-		get_sdf_rotation3(
-			get_circle_sdf(Circle3d(1.)),
-			Eigen::AngleAxisd(M_PI / 3., Eigen::Vector3d(0., -1., 0.))
-		), 
-	-.2);
+	auto sdf = get_sdf_rotation3(
+		get_trimesh_sdf(triangle_list),
+		Eigen::AngleAxisd(M_PI / 6., Eigen::Vector3d(0., -1., 0.))
+	);
 
 	// Setup the render target
 	PNGRenderTarget render_target("out.png", 256, 256);
 
 	// Setup the shader
 	PerspectiveProjectiond projection;
-	Sphere3d bound_sphere = sdf.get_bounding_sphere();
+	auto bound_sphere = sdf.get_bounding_sphere();
 	projection.eye_pos() = bound_sphere.center() + Eigen::Vector3d(0., 0., -1.5 * bound_sphere.radius());
 
 	PhongFragmentShaderd frag_shader;

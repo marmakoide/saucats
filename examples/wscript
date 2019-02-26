@@ -24,6 +24,12 @@ def configure(context):
 
 
 def build(context):
+	context(
+		name            = 'stlparser',
+		includes        = 'stlparser/include',
+		export_includes = 'stlparser/include'
+	)
+
 	context.program(
 		target = 'saucats-custom-shader-2d',
 		source = context.path.ant_glob('custom-shader-2d/*.cpp'),
@@ -44,4 +50,12 @@ def build(context):
 		lib    = ['m'],
 		use    = ['saucats', 'png', 'eigen']
 	)
+
+	context.program(
+		target = 'saucats-trimesh',
+		source = context.path.ant_glob('trimesh/*.cpp'),
+		lib    = ['m'],
+		use    = ['stlparser', 'saucats', 'png', 'eigen']
+	)
+
 
