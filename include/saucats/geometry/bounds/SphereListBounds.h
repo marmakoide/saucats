@@ -19,15 +19,17 @@ namespace saucats {
 			typedef typename iterator_type::value_type sphere_type;
 			typedef typename sphere_type::vector_type vector_type;
 	
-			vector_type min_corner = *start_it;
-			vector_type max_corner = *start_it;
+			vector_type min_corner = start_it->center();
+			vector_type max_corner = start_it->center();
 			
 			for(++start_it; start_it != end_it; ++start_it) {
 				const sphere_type& sphere = *start_it;
-				min_corner = min_corner.cwiseMin(sphere.center().array() - sphere.radius());
-				max_corner = max_corner.cwiseMax(sphere.center().array() + sphere.radius());
+				vector_type A = sphere.center().array() - sphere.radius();
+				vector_type B = sphere.center().array() + sphere.radius();
+				min_corner = min_corner.cwiseMin(A);
+				max_corner = max_corner.cwiseMax(B);
 			}
-
+			
 			return
 				BoxT<vector_type>(max_corner - min_corner,
 				                  (min_corner + max_corner) / 2);
