@@ -20,10 +20,10 @@ namespace saucats {
 		 */
 
 		template <class iterator_type>
-		BoxT<typename iterator_type::value_type::vector_type>
+		BoxT<typename iterator_type::value_type>
 		get_bounding_box(iterator_type start_it,
 		                 iterator_type end_it) {
-			typedef typename iterator_type::vector_type vector_type;
+			typedef typename iterator_type::value_type vector_type;
 
 			vector_type min_corner = *start_it;
 			vector_type max_corner = *start_it;
