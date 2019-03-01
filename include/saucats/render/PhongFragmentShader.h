@@ -70,7 +70,7 @@ namespace saucats {
 			scalar_type u = get_shadow(sdf, line_type(-m_light_dir, P), bounding_sphere);
 
 			// Normal vector
-			vector_type N = get_sdf_gradient(sdf, P, 1e-6).normalized();
+			vector_type N = get_sdf_gradient(sdf, P, 1e-5).normalized();
 
 			// Light
 			vector_type L = m_light_dir;
