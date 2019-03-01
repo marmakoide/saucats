@@ -4,6 +4,7 @@
 #include <saucats/utils/ArrayT.h>
 #include <saucats/sdf/SegmentSDF.h>
 #include <saucats/geometry/bounds/PointListBounds.h>
+#include <saucats/geometry/BoxTree.h>
 
 
 
@@ -20,14 +21,33 @@ namespace saucats {
 		typedef SegmentSDF<vector_type> segment_sdf_type;
 		typedef SphereT<vector_type> sphere_type;
 
+		typedef BoxT<vector_type> box_type;
+		typedef BoxTreeT<box_type, std::size_t> boxtree_type;
+
 		typedef Eigen::Matrix<scalar_type, Eigen::Dynamic, 2> vertex_array_type;
 		typedef Eigen::Matrix<Eigen::Index, Eigen::Dynamic, 2> edge_array_type;
 
 
-		
+
+		static box_type segment_bounding_box(const vector_type& A, const vector_type& B) {
+			std::vector<vector_type> pair(2);
+			pair[0] = A;
+			pair[1] = B;
+			return point_collection::get_bounding_box(pair.begin(), pair.end());
+		}
+
 		Polygon2SDF(const vertex_array_type& vertex_array,
 		            const edge_array_type& edge_array) :
 			m_segment_sdf_array(edge_array.rows()) {
+			// Build the boxtree
+			std::vector<std::size_t> id_list(edge_array.rows());
+			std::iota(id_list.begin(), id_list.end(), 0);
+			
+			m_boxtree =
+				boxtree_type::from_kd_construction(id_list.begin(), id_list.end(), 
+					[&vertex_array, &edge_array](size_t i) -> box_type { return segment_bounding_box(vertex_array.row(edge_array(i, 0)), vertex_array.row(edge_array(i, 1))); }
+				);
+
 			// Compute the segments
 			for(Eigen::Index i = 0; i < edge_array.rows(); ++i)
 				m_segment_sdf_array[i] = segment_sdf_type(segment_type::from_2_points(vertex_array.row(edge_array(i, 0)), vertex_array.row(edge_array(i, 1))));
@@ -42,20 +62,53 @@ namespace saucats {
 			m_bounding_sphere = point_collection::get_bounding_sphere(points.begin(), points.end());
 		}
 		
-
-
 		template <typename InVectorT>
 		inline typename InVectorT::Scalar
 		dist(const InVectorT& X) const {
-			auto seg_it = m_segment_sdf_array.begin();
-			scalar_type dist = std::fabs(seg_it->dist(X));
-			for(++seg_it; seg_it != m_segment_sdf_array.end(); ++seg_it)
-				dist = std::min(dist, std::fabs(seg_it->dist(X)));
+			typedef typename boxtree_type::Node const* node_ptr_type;
+			// Find the distance to the closest triangle
+			bool first_hit = true;
+			typename InVectorT::Scalar min_dist = 0.;
 
+			std::stack<node_ptr_type> stack;
+			stack.push(m_boxtree.root());
+			while(!stack.empty()) {
+				// Pop a node
+				node_ptr_type node = stack.top();
+				stack.pop();
+
+				// Skip nodes that can't possibly closer than the closest segment found so far
+				if ((!first_hit) and (node->box().dist(X) >= min_dist))
+					continue;
+
+				// If we reached a leaf node, update closest segment found so far
+				if (node->is_leaf()) {
+					if (first_hit) {
+						min_dist = m_segment_sdf_array[node->value()].dist(X);
+						first_hit = false;
+					}
+					else
+						min_dist = std::min(min_dist, m_segment_sdf_array[node->value()].dist(X));
+				}
+				// If we are not in a leaf node 
+				else {
+					node_ptr_type left_child = node->children().first;
+					node_ptr_type right_child = node->children().second;
+
+					if ((left_child->box().center() - X).squaredNorm() > (right_child->box().center() - X).squaredNorm())
+						std::swap(left_child, right_child);
+
+					stack.push(right_child);
+					stack.push(left_child);
+				}
+			}
+
+			// Negative distance if inside the mesh
 			if (is_inside(X))
-				dist = -dist;
+				min_dist = -min_dist;
 
-			return dist;
+			// Job done
+			return min_dist;
 		}
 
 		inline sphere_type get_bounding_sphere() const {
@@ -97,8 +150,9 @@ namespace saucats {
 
 
 
-		sphere_type m_bounding_sphere;
 		ArrayT<segment_sdf_type> m_segment_sdf_array;
+		sphere_type m_bounding_sphere;
+		boxtree_type m_boxtree;
 	}; // class Polygon2SDF
 
 
