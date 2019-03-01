@@ -3,8 +3,8 @@
 
 #include <saucats/utils/ArrayT.h>
 #include <saucats/sdf/SegmentSDF.h>
-#include <saucats/geometry/bounds/PointListBounds.h>
 #include <saucats/geometry/BoxTree.h>
+#include <saucats/geometry/bounds/PointListBounds.h>
 
 
 
@@ -29,28 +29,21 @@ namespace saucats {
 
 
 
-		static box_type segment_bounding_box(const vector_type& A, const vector_type& B) {
-			std::vector<vector_type> pair(2);
-			pair[0] = A;
-			pair[1] = B;
-			return point_collection::get_bounding_box(pair.begin(), pair.end());
-		}
-
 		Polygon2SDF(const vertex_array_type& vertex_array,
 		            const edge_array_type& edge_array) :
 			m_segment_sdf_array(edge_array.rows()) {
+			// Compute the segments
+			for(Eigen::Index i = 0; i < edge_array.rows(); ++i)
+				m_segment_sdf_array[i] = segment_sdf_type(segment_type::from_2_points(vertex_array.row(edge_array(i, 0)), vertex_array.row(edge_array(i, 1))));
+
 			// Build the boxtree
 			std::vector<std::size_t> id_list(edge_array.rows());
 			std::iota(id_list.begin(), id_list.end(), 0);
 			
 			m_boxtree =
 				boxtree_type::from_kd_construction(id_list.begin(), id_list.end(), 
-					[&vertex_array, &edge_array](size_t i) -> box_type { return segment_bounding_box(vertex_array.row(edge_array(i, 0)), vertex_array.row(edge_array(i, 1))); }
+					[this](std::size_t i) -> box_type { return get_bounding_box(m_segment_sdf_array[i].segment()); }
 				);
-
-			// Compute the segments
-			for(Eigen::Index i = 0; i < edge_array.rows(); ++i)
-				m_segment_sdf_array[i] = segment_sdf_type(segment_type::from_2_points(vertex_array.row(edge_array(i, 0)), vertex_array.row(edge_array(i, 1))));
 
 			// Compute the bounding disc
 			// TODO : soon-to-be-release version of Eigen will interface directly with STL routines
