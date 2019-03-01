@@ -1,8 +1,7 @@
 #ifndef SAUCATS_SDF_SEGMENT_SDF_H
 #define SAUCATS_SDF_SEGMENT_SDF_H
 
-#include <saucats/geometry/Sphere.h>
-#include <saucats/geometry/Segment.h>
+#include <saucats/geometry/bounds/SegmentBounds.h>
 
 
 
@@ -45,7 +44,7 @@ namespace saucats {
 		}
 
 		inline sphere_type get_bounding_sphere() const {
-			return sphere_type(m_segment.line().origin(), m_segment.half_length());
+			return get_bounding_sphere(m_segment);
 		}
 
 	private:
