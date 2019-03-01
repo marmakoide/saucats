@@ -3,6 +3,7 @@
 
 #include <saucats/geometry/bounds/PointListBounds.h>
 #include <saucats/sdf/Triangle3SDF.h>
+#include <saucats/geometry/BoxTree.h>
 
 
 
@@ -15,6 +16,8 @@ namespace saucats {
 		typedef Eigen::Matrix<scalar_type, 3, 3> triangle_type;
 		typedef Triangle3SDF<scalar_type> triangle_sdf_type;
 		typedef SphereT<vector_type> sphere_type;
+		typedef BoxT<vector_type> box_type;
+		typedef BoxTreeT<box_type, std::size_t> boxtree_type;
 
 
 
@@ -23,6 +26,15 @@ namespace saucats {
 			m_triangle_list.reserve(triangle_list.size());
 			std::copy(triangle_list.begin(), triangle_list.end(), m_triangle_list.begin());
 
+			// Build the boxtree
+			std::vector<std::size_t> id_list(triangle_list.size());
+			std::iota(id_list.begin(), id_list.end(), 0);
+			
+			m_boxtree =
+				boxtree_type::from_kd_construction(id_list.begin(), id_list.end(), 
+					[&triangle_list](size_t i) -> box_type { return triangle_bounding_box(triangle_list[i]); }
+				);
+			
 			// Compute individual triangle signed distance functions
 			m_triangle_sdf_list.reserve(triangle_list.size());
 			for(const auto& t : triangle_list)
@@ -38,14 +50,48 @@ namespace saucats {
 			m_bounding_sphere = point_collection::get_bounding_sphere(vertex_list.begin(), vertex_list.end());
 		}
 
+	
+
 		template <typename InVectorT>
 		inline typename InVectorT::Scalar
 		dist(const InVectorT& X) const {
+			typedef typename boxtree_type::Node const* node_ptr_type;
 			// Find the distance to the closest triangle
-			typename std::vector<triangle_sdf_type>::const_iterator it = m_triangle_sdf_list.begin();
-			typename InVectorT::Scalar min_dist = (*it).dist(X);
-			for(++it; it != m_triangle_sdf_list.end(); ++it)
-				min_dist = std::min(min_dist, (*it).dist(X));
+			bool first_hit = true;
+			typename InVectorT::Scalar min_dist = 0;
+
+			std::stack<node_ptr_type> stack;
+			stack.push(m_boxtree.root());
+			while(!stack.empty()) {
+				// Pop a node
+				node_ptr_type node = stack.top();
+				stack.pop();
+
+				// Skip nodes that can't possibly closer than the closest segment found so far
+				if ((!first_hit) and (node->box().dist(X) >= min_dist))
+					continue;
+
+				// If we reached a leaf node, update closest segment found so far
+				if (node->is_leaf()) {
+					if (first_hit) {
+						min_dist = m_triangle_sdf_list[node->value()].dist(X);
+						first_hit = false;
+					}
+					else
+						min_dist = std::min(min_dist, m_triangle_sdf_list[node->value()].dist(X));
+				}
+				// If we are not in a leaf node 
+				else {
+					node_ptr_type left_child = node->children().first;
+					node_ptr_type right_child = node->children().second;
+
+					if ((left_child->box().center() - X).squaredNorm() > (right_child->box().center() - X).squaredNorm())
+						std::swap(left_child, right_child);
+
+					stack.push(right_child);
+					stack.push(left_child);
+				}
+			}
 
 			// Negative distance if inside the mesh
 			if (is_inside(X))
@@ -60,6 +106,17 @@ namespace saucats {
 		}
 
 	private:
+		static box_type
+		triangle_bounding_box(const triangle_type& t) {
+			std::vector<vector_type> triplet(3);
+			triplet[0] = t.row(0);
+			triplet[1] = t.row(1);
+			triplet[2] = t.row(2);
+			return point_collection::get_bounding_box(triplet.begin(), triplet.end());
+		}
+
+
+
 		// Check whether a point is inside or outside a polygon
 		template <typename InVectorT>
 		inline bool
@@ -69,7 +126,6 @@ namespace saucats {
 			// For each triangle
 			for(const triangle_type& t : m_triangle_list) {
 				triangle_type M = t;
-				//M.array().rowwise() -= P.array();
 				M.row(0) -= P;
 				M.row(1) -= P;
 				M.row(2) -= P;
@@ -78,18 +134,21 @@ namespace saucats {
 				scalar_type b = M.row(1).norm();
 				scalar_type c = M.row(2).norm();
 				scalar_type omega = M.determinant() /  ((a * b * c) + c * M.row(0).dot(M.row(1)) + a * M.row(1).dot(M.row(2)) + b * M.row(2).dot(M.row(0)));
-				winding_number += std::atan(omega);
+				//winding_number += std::atan(omega);
+				winding_number += omega;
 			}
 
 			// Job done
-			winding_number /= 2 * M_PI;
-			return winding_number > .5;
+			//winding_number /= 2 * M_PI;
+			//return winding_number > .5;
+			return winding_number > 0.;
 		}
 
 
 		std::vector<triangle_type> m_triangle_list;
 		std::vector<triangle_sdf_type> m_triangle_sdf_list;
 		sphere_type m_bounding_sphere;
+		boxtree_type m_boxtree;
 	}; // class TriMeshSDF
 
 

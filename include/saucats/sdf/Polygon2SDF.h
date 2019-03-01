@@ -61,7 +61,7 @@ namespace saucats {
 			typedef typename boxtree_type::Node const* node_ptr_type;
 			// Find the distance to the closest triangle
 			bool first_hit = true;
-			typename InVectorT::Scalar min_dist = 0.;
+			typename InVectorT::Scalar min_dist = 0;
 
 			std::stack<node_ptr_type> stack;
 			stack.push(m_boxtree.root());
