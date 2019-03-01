@@ -65,6 +65,19 @@ namespace saucats {
 			return ((X - m_center).cwiseAbs() - m_half_extent).maxCoeff() <= 0;
 		}
 
+		// Returns signed euclidean distance
+		template <typename InVectorT>
+		inline typename InVectorT::Scalar
+		dist(const InVectorT& X) const {
+			InVectorT M = ((X - m_center).cwiseAbs() - m_half_extent);
+	
+			typename InVectorT::Scalar max_coeff = M.maxCoeff();
+			if (max_coeff < 0)
+				return max_coeff;
+	
+			return M.cwiseMax(0).norm();
+		}
+
 		// Returns the corners of the box
 		Eigen::Matrix<scalar_type, CORNER_COUNT, vector_type::RowsAtCompileTime> corners() const {
 			Eigen::Matrix<scalar_type, CORNER_COUNT, vector_type::RowsAtCompileTime> ret;

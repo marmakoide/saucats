@@ -26,13 +26,7 @@ namespace saucats {
 		template <typename InVectorT>
 		inline typename InVectorT::Scalar
 		dist(const InVectorT& X) const {
-			InVectorT M = ((X - m_box.center()).cwiseAbs() - m_box.half_extent());
-	
-			typename InVectorT::Scalar max_coeff = M.maxCoeff();
-			if (max_coeff < 0)
-				return max_coeff;
-	
-			return M.cwiseMax(0).norm();
+			return m_box.dist(X);
 		}
 
 		inline sphere_type get_bounding_sphere() const {
