@@ -19,6 +19,7 @@ def configure(context):
 	context.load('compiler_cxx')
 	context.env.CXXFLAGS = ['-std=c++14', '-Wall', '-Wextra', '-O3', '-g', '-frounding-math']
 	context.check_cfg(package = 'eigen3', uselib_store = 'eigen', args = ['eigen3 >= 3.3', '--cflags'])
+	context.check_cfg(package = 'fftw3', uselib_store = 'fftw', args = '--cflags --libs')
 	context.check_cfg(package = 'libpng', atleast_version='1.2.0',  uselib_store = 'png', args = '--cflags --libs')
 
 	context.setenv('release', env = context.env.derive())
