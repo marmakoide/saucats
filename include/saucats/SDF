@@ -10,6 +10,7 @@
 #include <saucats/sdf/Rotation.h>
 #include <saucats/sdf/SegmentSDF.h>
 #include <saucats/sdf/SphereSDF.h>
+#include <saucats/sdf/Translation.h>
 #include <saucats/sdf/Triangle3SDF.h>
 #include <saucats/sdf/TriMeshSDF.h>
 
