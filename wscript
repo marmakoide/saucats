@@ -79,6 +79,6 @@ def build(context):
 			includes = 'tests',
 			source   = context.path.ant_glob('tests/*.cpp'),
 			lib      = ['m'],
-			use      = ['saucats', 'png', 'eigen']
+			use      = ['saucats', 'fftw', 'png', 'eigen']
 		)
 
