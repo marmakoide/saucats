@@ -14,6 +14,61 @@ namespace saucats {
 	class FFT {
 	public:
 		static Eigen::VectorXcd
+		fft_1d(const Eigen::VectorXcd& A) {
+			// Allocate ressources
+			fftw_complex* A_data = (fftw_complex*)fftw_malloc(sizeof(fftw_complex) * A.size());
+			fftw_complex* U_data = (fftw_complex*)fftw_malloc(sizeof(fftw_complex) * A.size());
+
+			// Mapping of raw data for Eigen library
+			Eigen::Map<Eigen::Matrix<std::complex<double>, Eigen::Dynamic, 1> > A_data_map((std::complex<double>*)A_data, A.size());
+			Eigen::Map<Eigen::Matrix<std::complex<double>, Eigen::Dynamic, 1> > U_data_map((std::complex<double>*)U_data, A.size());
+	
+			// Setup FFT computations
+			fftw_plan fftw_plan = fftw_plan_dft_1d(A.size(), A_data, U_data, FFTW_FORWARD, FFTW_ESTIMATE);
+
+			// Compute FFT
+			A_data_map = A;
+			fftw_execute(fftw_plan);
+			Eigen::VectorXcd U = U_data_map;
+
+			// Free ressources	
+			fftw_destroy_plan(fftw_plan);
+			fftw_free(U_data);
+			fftw_free(A_data);
+
+			// Job done
+			return U;
+		}
+
+		static Eigen::VectorXcd
+		ifft_1d(const Eigen::VectorXcd& U) {
+			// Allocate ressources
+			fftw_complex* A_data = (fftw_complex*)fftw_malloc(sizeof(fftw_complex) * U.size());
+			fftw_complex* U_data = (fftw_complex*)fftw_malloc(sizeof(fftw_complex) * U.size());	
+
+			// Mapping of raw data for Eigen library
+			Eigen::Map<Eigen::Matrix<std::complex<double>, Eigen::Dynamic, 1> > A_data_map((std::complex<double>*)A_data, U.size());
+			Eigen::Map<Eigen::Matrix<std::complex<double>, Eigen::Dynamic, 1> > U_data_map((std::complex<double>*)U_data, U.size());
+	
+			// Setup FFT computations
+			fftw_plan fftw_plan = fftw_plan_dft_1d(U.size(), U_data, A_data, FFTW_BACKWARD, FFTW_ESTIMATE);
+
+			// Compute inverse FFT
+			U_data_map = U;
+			fftw_execute(fftw_plan);
+			Eigen::VectorXcd A = A_data_map;
+			A /= A.size();
+
+			// Free ressources	
+			fftw_destroy_plan(fftw_plan);
+			fftw_free(U_data);
+			fftw_free(A_data);
+
+			// Job done
+			return A;
+		}
+
+		static Eigen::VectorXcd
 		real_fft_1d(const Eigen::VectorXd& A) {
 			// Allocate ressources
 			double* A_data = (double*)fftw_malloc(sizeof(double) * A.size());
