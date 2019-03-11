@@ -40,6 +40,8 @@ namespace saucats {
 			return U;
 		}
 
+
+
 		static Eigen::VectorXcd
 		ifft_1d(const Eigen::VectorXcd& U) {
 			// Allocate ressources
@@ -68,6 +70,67 @@ namespace saucats {
 			return A;
 		}
 
+
+
+		static Eigen::MatrixXcd
+		fft_2d(const Eigen::MatrixXcd& A) {
+			// Allocate ressources
+			fftw_complex* A_data = (fftw_complex*)fftw_malloc(sizeof(fftw_complex) * A.rows() * A.cols());
+			fftw_complex* U_data = (fftw_complex*)fftw_malloc(sizeof(fftw_complex) * A.rows() * A.cols());
+
+			// Mapping of raw data for Eigen library
+			Eigen::Map<Eigen::Matrix<std::complex<double>, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> > A_data_map((std::complex<double>*)A_data, A.rows(), A.cols());
+			Eigen::Map<Eigen::Matrix<std::complex<double>, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> > U_data_map((std::complex<double>*)U_data, A.rows(), A.cols());
+	
+			// Setup FFT computations
+			fftw_plan fftw_plan = fftw_plan_dft_2d(A.cols(), A.rows(), A_data, U_data, FFTW_FORWARD, FFTW_ESTIMATE);
+
+			// Compute FFT
+			A_data_map = A;
+			fftw_execute(fftw_plan);
+			Eigen::MatrixXcd U = U_data_map;
+
+			// Free ressources	
+			fftw_destroy_plan(fftw_plan);
+			fftw_free(U_data);
+			fftw_free(A_data);
+
+			// Job done
+			return U;
+		}
+
+
+
+		static Eigen::MatrixXcd
+		ifft_2d(const Eigen::MatrixXcd& U) {
+			// Allocate ressources
+			fftw_complex* A_data = (fftw_complex*)fftw_malloc(sizeof(fftw_complex) * U.rows() * U.cols());
+			fftw_complex* U_data = (fftw_complex*)fftw_malloc(sizeof(fftw_complex) * U.rows() * U.cols());
+
+			// Mapping of raw data for Eigen library
+			Eigen::Map<Eigen::Matrix<std::complex<double>, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> > A_data_map((std::complex<double>*)A_data, U.rows(), U.cols());
+			Eigen::Map<Eigen::Matrix<std::complex<double>, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> > U_data_map((std::complex<double>*)U_data, U.rows(), U.cols());
+	
+			// Setup FFT computations
+			fftw_plan fftw_plan = fftw_plan_dft_2d(U.cols(), U.rows(), U_data, A_data, FFTW_BACKWARD, FFTW_ESTIMATE);
+
+			// Compute inverse FFT
+			U_data_map = U;
+			fftw_execute(fftw_plan);
+			Eigen::MatrixXcd A = A_data_map;
+			A /= A.rows() * A.cols();
+
+			// Free ressources	
+			fftw_destroy_plan(fftw_plan);
+			fftw_free(U_data);
+			fftw_free(A_data);
+
+			// Job done
+			return A;
+		}
+
+
+
 		static Eigen::VectorXcd
 		real_fft_1d(const Eigen::VectorXd& A) {
 			// Allocate ressources
@@ -94,6 +157,8 @@ namespace saucats {
 			// Job done
 			return U;
 		}
+
+
 
 		static Eigen::VectorXd
 		real_ifft_1d(const Eigen::VectorXcd& U) {
@@ -122,6 +187,8 @@ namespace saucats {
 			// Job done
 			return A;
 		}
+
+
 
 		static Eigen::MatrixXcd
 		real_fft_2d(const Eigen::MatrixXd& A) {
