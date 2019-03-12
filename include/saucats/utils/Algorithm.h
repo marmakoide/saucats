@@ -30,6 +30,32 @@ namespace saucats {
 	matrix_rotate_180(matrix_type& U) {
 		U.rowwise().reverseInPlace();
 		U.colwise().reverseInPlace();
+	}
+
+
+
+	/*
+	 * Sample a 2dfunction
+	 */
+
+	template <class func_type, class matrix_type>
+	void
+	sample_function_2d(const BoxT<typename func_type::vector_type>& domain,
+                     matrix_type& matrix,
+                     const func_type& func) {
+		for(Eigen::Index i = 0; i < matrix.rows(); ++i) {
+			for(Eigen::Index j = 0; j < matrix.cols(); ++j) {
+				Eigen::Vector2d P;
+
+				P.x() = (i + .5) / matrix.rows();
+				P.y() = (j + .5) / matrix.cols();			
+				P.array() -= .5;
+				P.array() *= 2 * domain.half_extent().array();
+				P += domain.center();
+
+				matrix.coeffRef(i, j) = func(P);
+			}
+		}
 	}	
 } // namespace saucats
 
