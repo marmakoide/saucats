@@ -1,6 +1,8 @@
 #include <saucats/Geometry>
 #include <saucats/Macros>
+#include <saucats/Render>
 #include <saucats/SDF>
+
 #include <saucats/utils/Algorithm.h>
 
 #include <fstream>
@@ -11,7 +13,9 @@ using namespace saucats;
 
 
 
-// --- Define the shapes to dock together -------------------------------------
+/*
+ * Define the shapes to dock together
+ */
 
 auto
 get_left_sdf() {
@@ -53,72 +57,78 @@ get_right_sdf() {
 
 
 
-// --- Rendering code ---------------------------------------------------------
+/*
+ * Rendering code
+ */
 
 template <class left_func_type, class right_func_type>
-class DebugFunctor {
+class Shader {
 public:
-	typedef typename left_func_type::scalar_type scalar_type;
-	typedef typename left_func_type::vector_type vector_type;
+	typedef Eigen::Vector2d uv_coord_type;
+	typedef Eigen::Vector3d color_type;
 
 
 
-	DebugFunctor(const left_func_type& left_func,
-	             const right_func_type& right_func) :
+	Shader(const left_func_type& left_func,
+	       const right_func_type& right_func) :
 		m_left_func(left_func),
-		m_right_func(right_func) { }
+		m_right_func(right_func),
+		m_left_bounding_sphere(left_func.get_bounding_sphere()),
+		m_right_bounding_sphere(right_func.get_bounding_sphere()),
+		m_a_color(.552, .827, .780),
+		m_b_color(1., 1., .701),
+		m_c_color(.745, .729, .854),
+		m_d_color(.984, .501, .447) { }
 
-	inline scalar_type
-	operator() (const vector_type& P) const {
-		bool a = m_left_func.dist(P) < 0;
-		bool b = m_right_func.dist(P) < 0;
-											
-		if (a) {
-			if (b)
-				return 2.;
-			else
-				return 1.5;
-		}
-		else {
-			if (b)
-				return .5;
-			else
-				return 0.;
-			}
-	} 
-	
+	color_type
+	get_color(uv_coord_type UV) const {
+		uv_coord_type P = UV;
+		P.array() -= .5;
+		P *= 2 * (m_left_bounding_sphere.radius() + m_right_bounding_sphere.radius());
+		P += m_left_bounding_sphere.center();
+		
+		bool is_left = m_left_bounding_sphere.contains(P) and (m_left_func.dist(P) < 0.);
+		bool is_right = m_right_bounding_sphere.contains(P) and (m_right_func.dist(P) < 0.);
+			
+		if (is_left and is_right)
+			return m_a_color;
+
+		if (is_left)
+			return m_b_color;
+
+		if (is_right)
+			return m_c_color;
+
+		return m_d_color;				
+	}
+
 private:
 	const left_func_type& m_left_func;
 	const right_func_type& m_right_func;
-}; // class DebugFunctor
 
- 
+	typename left_func_type::sphere_type m_left_bounding_sphere;
+	typename right_func_type::sphere_type m_right_bounding_sphere;
+
+	color_type m_a_color;
+	color_type m_b_color;
+	color_type m_c_color;
+	color_type m_d_color;
+}; // class Shader
+
+
 
 template <class left_func_type, class right_func_type>
-DebugFunctor<left_func_type, right_func_type>
-get_debug_functor(const left_func_type& left_func,
-                  const right_func_type& right_func) {
-	return DebugFunctor<left_func_type, right_func_type>(left_func, right_func);
+Shader<left_func_type, right_func_type>
+get_shader(const left_func_type& left_func,
+           const right_func_type& right_func) {
+	return Shader<left_func_type, right_func_type>(left_func, right_func);
 }
 
 
 
-template <class matrix_type>
-void
-output_matrix(matrix_type& matrix, std::ostream& out) {
-	for(Eigen::Index i = 0; i < matrix.rows(); ++i) {
-		for(Eigen::Index j = 0; j < matrix.cols(); ++j) {
-			if (j > 0)
-				out << " ";
-			out << matrix(i, j);
-		}
-		out << endl;
-	}
-}
-
-
-
-// --- Main entry point -------------------------------------------------------
+/*
+ * Main entry point
+ */
 
 int
 main(int UNUSED_PARAM(argc), char** UNUSED_PARAM(argv)) {
@@ -130,16 +140,15 @@ main(int UNUSED_PARAM(argc), char** UNUSED_PARAM(argv)) {
 	Eigen::Transform<double, 2, Eigen::Affine> transform = 
 		registrate_2d(left_sdf, right_sdf, .1, true);
 
-	// Output the result
-	auto left_bounding_sphere = left_sdf.get_bounding_sphere();
-	auto right_bounding_sphere = right_sdf.get_bounding_sphere();
+	// Setup the render target
+	PNGRenderTarget render_target("out.png", 512, 512);
 
-	Eigen::MatrixXd Z(256, 256);
-	Box2d box_domain((2 * (left_bounding_sphere.radius() + right_bounding_sphere.radius())) * Eigen::Vector2d::Ones(), left_bounding_sphere.center());
-	
-	sample_function_2d(box_domain, Z, get_debug_functor(left_sdf, get_sdf_affine_transform(right_sdf, transform)));	
-	std::ofstream out_file("out.txt");
-	output_matrix(Z, out_file);	
+	// Setup the shader
+	auto transformed_right_sdf = get_sdf_affine_transform(right_sdf, transform);
+	auto shader = get_shader(left_sdf, transformed_right_sdf);
+
+	// Render the distance field
+	get_renderer(shader, render_target).render();
 
 	// Job done
 	return EXIT_SUCCESS;
