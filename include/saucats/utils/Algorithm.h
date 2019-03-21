@@ -8,6 +8,19 @@
 
 namespace saucats {
 	/*
+	 * Return the smallest power of 2 that is greater than x
+	 */
+
+	Eigen::Index
+	get_smallest_greater_power_of_2(Eigen::Index x) {
+		Eigen::Index ret;
+		for(ret = 1; ret < x; ret *= 2);
+		return ret;
+	}
+
+
+
+	/*
 	 * Return an iterator on an element of a collection
 	 */
 
@@ -35,7 +48,7 @@ namespace saucats {
 
 
 	/*
-	 * Sample a 2dfunction
+	 * Sample a 2d function
 	 */
 
 	template <class func_type, class matrix_type>

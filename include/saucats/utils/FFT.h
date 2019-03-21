@@ -202,8 +202,6 @@ namespace saucats {
 
 
 
-	class FFT {
-	public:
 		/*
 		typedef Eigen::Tensor<std::complex<double>, 3, Eigen::RowMajor> tensor3d_complex_type;
 
@@ -236,7 +234,6 @@ namespace saucats {
 			return U;
 		}
 		*/
-	}; // class FFT
 } // namespace saucats
 
 
