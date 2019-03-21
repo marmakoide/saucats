@@ -48,7 +48,11 @@ get_shader(const func_type& func) {
 }
 
 
- 
+
+/*
+ * Main entry point
+ */
+
 int
 main(int UNUSED_PARAM(argc), char** UNUSED_PARAM(argv)) {
 	// Setup the distance field
