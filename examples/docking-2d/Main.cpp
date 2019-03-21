@@ -127,7 +127,8 @@ main(int UNUSED_PARAM(argc), char** UNUSED_PARAM(argv)) {
 	auto right_sdf = get_right_sdf();
 
 	// Compute the transformation to dock 'right' shape into 'left' shape
-	Eigen::Transform<double, 2, Eigen::Affine> transform = registrate(left_sdf, right_sdf, .1, true);
+	Eigen::Transform<double, 2, Eigen::Affine> transform = 
+		registrate_2d(left_sdf, right_sdf, .1, true);
 
 	// Output the result
 	auto left_bounding_sphere = left_sdf.get_bounding_sphere();

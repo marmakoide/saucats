@@ -3,6 +3,7 @@
 
 
 
+#include <saucats/sdf/AffineTransform.h>
 #include <saucats/sdf/BoxSDF.h>
 #include <saucats/sdf/CircleSDF.h>
 #include <saucats/sdf/Offset.h>
@@ -16,6 +17,7 @@
 
 #include <saucats/sdf/utils/Gradient.h>
 #include <saucats/sdf/utils/Intersection.h>
+#include <saucats/sdf/utils/Registration.h>
 
 
 

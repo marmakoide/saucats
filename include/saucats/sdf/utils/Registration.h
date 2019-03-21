@@ -163,10 +163,10 @@ namespace saucats {
 
 	template <class left_func_type, class right_func_type>
 	Eigen::Transform<double, 2, Eigen::Affine>
-	registrate(const left_func_type& left_func,
-  	         const right_func_type& right_func,
-  	         double resolution,
-	           bool complement) {
+	registrate_2d(const left_func_type& left_func,
+  	            const right_func_type& right_func,
+  	            double resolution,
+	              bool complement) {
 		// Compute left and right sdf bounding sphere
 		auto left_bounding_sphere = left_func.get_bounding_sphere();
 		auto right_bounding_sphere = right_func.get_bounding_sphere();
