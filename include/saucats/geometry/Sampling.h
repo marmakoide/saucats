@@ -10,7 +10,7 @@
 
 namespace saucats {
 	/*
-	 *  Uniform sampling of a box volume
+	 *  Random uniform sampling of a box volume
 	 */
 
 	template <class VectorT>
@@ -52,7 +52,7 @@ namespace saucats {
 
 
 	/*
-	 * Uniform sampling of a sphere surface
+	 * Random uniform sampling of a sphere surface
 	 */
 
 	// Generic implementation
@@ -159,8 +159,9 @@ namespace saucats {
 
 
 
+
 	/*
-	 * Uniform sampling of a sphere volume
+	 * Random uniform sampling of a sphere volume
 	 */
 
 	template <class VectorT>
@@ -264,6 +265,30 @@ namespace saucats {
 	SphereVolumeSampler<VectorT>
 	get_sphere_volume_sampler(const SphereT<VectorT>& sphere) {
 		return SphereVolumeSampler<VectorT>(sphere);
+	}
+
+
+
+	/*
+	 * Approximatively regular uniform sampling of a sphere surface
+	 */
+
+	template <class ValueT>
+	Eigen::Matrix<ValueT, Eigen::Dynamic, 3>
+	get_spiral_sphere(Eigen::Index point_count) {
+		typedef Eigen::Array<ValueT, Eigen::Dynamic, 1> array_1d_type;
+
+		const ValueT golden_angle = M_PI * (3. - std::sqrt(5.));
+
+		array_1d_type theta = array_1d_type::LinSpaced(point_count, 0., golden_angle * (point_count - 1));
+		array_1d_type Z = array_1d_type::LinSpaced(point_count, 1. - (1. / point_count), (1. / point_count) - 1.);
+		array_1d_type R = (array_1d_type::Ones(point_count) - Z.square()).sqrt();
+
+		auto ret = Eigen::Matrix<ValueT, Eigen::Dynamic, 3>(point_count, 3);
+		ret.col(0) = R * theta.cos();
+		ret.col(1) = R * theta.sin();
+		ret.col(2) = Z;
+		return ret;
 	}
 } // namespace saucats
 
