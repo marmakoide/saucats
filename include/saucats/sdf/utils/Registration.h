@@ -1,6 +1,7 @@
 #ifndef SAUCATS_SDF_UTILS_REGISTRATION_H
 #define SAUCATS_SDF_UTILS_REGISTRATION_H
 
+#include <saucats/geometry/Sampling.h>
 #include <saucats/utils/PseudoPolarFFT.h>
 
 
@@ -17,23 +18,19 @@ namespace saucats {
 		 */
 
 		template <class func_type>
-		class RegistrationField2dFunctor {
+		class RegistrationFieldFunctor {
 		public:
 			typedef typename func_type::scalar_type scalar_type;
 			typedef typename func_type::vector_type vector_type;
 			typedef typename func_type::sphere_type sphere_type;
+			typedef Eigen::Matrix<scalar_type, Eigen::Dynamic, vector_type::RowsAtCompileTime> sample_array_type;
 
 
 
-			RegistrationField2dFunctor(const func_type& func,
-	    		                       Eigen::Index sample_count) :
-				m_U(sample_count, 2), 
-				m_func(func) {
-				for(Eigen::Index i = 0; i < sample_count; ++i) {
-					scalar_type theta = (2 * M_PI / sample_count) * i;
-					m_U.row(i) << std::cos(theta), std::sin(theta); 
-				}
-			}
+			RegistrationFieldFunctor(const func_type& func,
+	    		                     const sample_array_type& sample_array) :
+				m_func(func),
+				m_sample_array(sample_array) { }
 
 			scalar_type 
 			operator () (const vector_type& P) const {
@@ -43,35 +40,36 @@ namespace saucats {
 				scalar_type P_radius = std::fabs(P_dist);
 	
 				scalar_type sum = 0.;
-				for(Eigen::Index i = 0; i < m_U.rows(); ++i) {	
+				for(Eigen::Index i = 0; i < m_sample_array.rows(); ++i) {	
 					sphere_type search_sphere(P, P_radius + epsilon);
-					LineT<vector_type> search_line(m_U.row(i), P);
+					LineT<vector_type> search_line(m_sample_array.row(i), P);
 					auto it = get_intersection_iterator(m_func, search_line, search_sphere);		
 					if (!it.completed())
 						sum += 1;
 				}
 
-			return std::copysign(sum / m_U.rows(), P_dist);
+			return std::copysign(sum / m_sample_array.rows(), P_dist);
 		}
 
 		private:
-			Eigen::Matrix<scalar_type, Eigen::Dynamic, 2> m_U;
 			const func_type& m_func;
+			const sample_array_type& m_sample_array;
 		}; // class RegistrationField2dFunctor
+
+
+
+		template <class func_type>
+		RegistrationFieldFunctor<func_type>
+		get_registration_field_functor(const func_type& func,
+		                               const Eigen::Matrix<typename func_type::scalar_type, Eigen::Dynamic, func_type::vector_type::RowsAtCompileTime>& sample_array) {
+			return RegistrationFieldFunctor<func_type>(func, sample_array);
+		}
 
 
 
 		/*
 		 * Augment a scalar field with a mask
 		 */
-
-		template <class func_type>
-		RegistrationField2dFunctor<func_type>
-		get_registration_field_2d_functor(const func_type& func,
-		                                  Eigen::Index sample_count) {
-			return RegistrationField2dFunctor<func_type>(func, sample_count);
-		}
-
 
 
 		template <class func_type, class shape_type>
@@ -116,9 +114,9 @@ namespace saucats {
 		 */
 
 		Eigen::Vector2d
-		solve_translation(const Eigen::MatrixXd& A,
-		                  const Eigen::MatrixXd& B,
-		                  double& score) {
+		solve_translation_2d(const Eigen::MatrixXd& A,
+		                     const Eigen::MatrixXd& B,
+		                     double& score) {
 			// Compute C as cross-correlation of A and B
 			RealFFT2d real_fft_2d(A.rows());
 
@@ -149,13 +147,14 @@ namespace saucats {
 		void
 		fill_density_matrix(const func_type& func,
                         Eigen::MatrixXd& M,
-                        const typename func_type::sphere_type& domain, 
+                        const typename func_type::sphere_type& domain,
+		                    const Eigen::Matrix<typename func_type::scalar_type, Eigen::Dynamic, func_type::vector_type::RowsAtCompileTime>& sample_array,
                         double resolution) {
 			// Compute the box domain
 			auto box_domain = BoxT<typename func_type::vector_type>(Eigen::Vector2d(resolution * M.rows(), resolution * M.cols()), domain.center());
 
 			// Fills the matrix
-			sample_function_2d(box_domain, M, registration::get_masked_functor(registration::get_registration_field_2d_functor(func, 256), domain));
+			sample_function_2d(box_domain, M, registration::get_masked_functor(registration::get_registration_field_functor(func, sample_array), domain));
 		}
 	} // namespace registration
 
@@ -167,6 +166,8 @@ namespace saucats {
   	            const right_func_type& right_func,
   	            double resolution,
 	              bool complement) {
+		auto unit_circle_samples = get_circle_points<double>(256);
+
 		// Compute left and right sdf bounding sphere
 		auto left_bounding_sphere = left_func.get_bounding_sphere();
 		auto right_bounding_sphere = right_func.get_bounding_sphere();
@@ -183,8 +184,8 @@ namespace saucats {
 		Eigen::MatrixXd left_M(matrix_size, matrix_size);
 		Eigen::MatrixXd right_M(matrix_size, matrix_size);
 
-		registration::fill_density_matrix(left_func, left_M, left_domain, resolution);
-		registration::fill_density_matrix(right_func, right_M, right_domain, resolution);
+		registration::fill_density_matrix(left_func, left_M, left_domain, unit_circle_samples, resolution);
+		registration::fill_density_matrix(right_func, right_M, right_domain, unit_circle_samples, resolution);
 
 		// Switch sign of right function
 		if (complement)
@@ -237,7 +238,7 @@ namespace saucats {
 			rotated_right_func = get_sdf_rotation2(right_func, -(.5 * M_PI / matrix_size) * angle);
 			right_bounding_sphere = rotated_right_func.get_bounding_sphere();
 			right_domain = Sphere2d(right_bounding_sphere.center(), right_bounding_sphere.radius());
-			registration::fill_density_matrix(rotated_right_func, right_M, right_domain, resolution);
+			registration::fill_density_matrix(rotated_right_func, right_M, right_domain, unit_circle_samples, resolution);
 
 			if (complement)
 				right_M = -right_M;
@@ -247,12 +248,12 @@ namespace saucats {
 	
 		// Solve the translation component
 		double hi_score = 0.;
-		Eigen::Vector2d hi_T = registration::solve_translation(left_M, right_M, hi_score);
+		Eigen::Vector2d hi_T = registration::solve_translation_2d(left_M, right_M, hi_score);
 
 		matrix_rotate_180(right_M);
 
 		double lo_score = 0.;
-		Eigen::Vector2d lo_T = registration::solve_translation(left_M, right_M, lo_score);
+		Eigen::Vector2d lo_T = registration::solve_translation_2d(left_M, right_M, lo_score);
 
 		Eigen::Vector2d T;
 		if (hi_score > lo_score)

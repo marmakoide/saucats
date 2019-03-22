@@ -270,6 +270,23 @@ namespace saucats {
 
 
 	/*
+	 * Approximatively regular uniform sampling of a circle
+	 */
+
+	template <class ValueT>
+	Eigen::Matrix<ValueT, Eigen::Dynamic, 2>
+	get_circle_points(Eigen::Index point_count) {
+		Eigen::Matrix<ValueT, Eigen::Dynamic, 2> ret(point_count, 2);
+		for(Eigen::Index i = 0; i < point_count; ++i) {
+			ValueT theta = (2 * M_PI / point_count) * i;
+			ret.row(i) << std::cos(theta), std::sin(theta); 
+		}
+		return ret;
+	}
+
+
+
+	/*
 	 * Approximatively regular uniform sampling of a sphere surface
 	 */
 
