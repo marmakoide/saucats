@@ -12,6 +12,8 @@ addons:
       - g++-6
 before_install:
   - "[ $CXX = g++ ] && export CXX=g++-6 || true"
+  - sudo apt-get update
+  - sudo apt-get install -y libfftw3-dev
 install:
   - scripts/travis-install-cmake.sh && export PATH=$(pwd)/cmake/bin:$PATH
   - scripts/travis-install-eigen3.sh
