@@ -12,12 +12,12 @@ namespace saucats {
 
 	namespace registration {
 		/*
-		 * From a signed distance field, define a 2dscalar field called "partial
+		 * From a signed distance field, define a 2d scalar field called "partial
 		 * occlusion field".
 		 */
 
 		template <class func_type>
-		class PartialOcclusionFunctor {
+		class PartialOcclusionFunctor2d {
 		public:
 			typedef typename func_type::scalar_type scalar_type;
 			typedef typename func_type::vector_type vector_type;
@@ -25,8 +25,8 @@ namespace saucats {
 
 
 
-			PartialOcclusionFunctor(const func_type& func,
-	    		                    Eigen::Index sample_count) :
+			PartialOcclusionFunctor2d(const func_type& func,
+	    		                      Eigen::Index sample_count) :
 				m_U(sample_count, 2), 
 				m_func(func) {
 				for(Eigen::Index i = 0; i < sample_count; ++i) {
@@ -57,7 +57,7 @@ namespace saucats {
 		private:
 			Eigen::Matrix<scalar_type, Eigen::Dynamic, 2> m_U;
 			const func_type& m_func;
-		}; // class PartialOcclusionFunctor
+		}; // class PartialOcclusionFunctor2d
 
 
 
@@ -66,10 +66,10 @@ namespace saucats {
 		 */
 
 		template <class func_type>
-		PartialOcclusionFunctor<func_type>
-		get_partial_occlusion_functor(const func_type& func,
-		                              Eigen::Index sample_count) {
-			return PartialOcclusionFunctor<func_type>(func, sample_count);
+		PartialOcclusionFunctor2d<func_type>
+		get_partial_occlusion_functor_2d(const func_type& func,
+		                                Eigen::Index sample_count) {
+			return PartialOcclusionFunctor2d<func_type>(func, sample_count);
 		}
 
 
@@ -155,7 +155,7 @@ namespace saucats {
 			auto box_domain = BoxT<typename func_type::vector_type>(Eigen::Vector2d(resolution * M.rows(), resolution * M.cols()), domain.center());
 
 			// Fills the matrix
-			sample_function_2d(box_domain, M, registration::get_masked_functor(registration::get_partial_occlusion_functor(func, 256), domain));
+			sample_function_2d(box_domain, M, registration::get_masked_functor(registration::get_partial_occlusion_functor_2d(func, 256), domain));
 		}
 	} // namespace registration
 
