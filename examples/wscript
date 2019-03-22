@@ -66,4 +66,10 @@ def build(context):
 		use    = ['saucats', 'fftw', 'png', 'eigen']
 	)
 
+	context.program(
+		target = 'saucats-docking-3d',
+		source = context.path.ant_glob('docking-3d/*.cpp'),
+		lib    = ['m'],
+		use    = ['saucats', 'fftw', 'png', 'eigen']
+	)
 
