@@ -4,6 +4,7 @@
 #include <saucats/geometry/bounds/PointListBounds.h>
 #include <saucats/sdf/Triangle3SDF.h>
 #include <saucats/geometry/BoxTree.h>
+#include <saucats/utils/KahanSum.h>
 
 
 
@@ -24,7 +25,7 @@ namespace saucats {
 		TriMeshSDF(const std::vector<triangle_type>& triangle_list) {
 			// Copy the triangle list
 			m_triangle_list.reserve(triangle_list.size());
-			std::copy(triangle_list.begin(), triangle_list.end(), m_triangle_list.begin());
+			std::copy(triangle_list.begin(), triangle_list.end(), std::back_inserter(m_triangle_list));
 
 			// Build the boxtree
 			std::vector<std::size_t> id_list(triangle_list.size());
@@ -121,11 +122,12 @@ namespace saucats {
 		template <typename InVectorT>
 		inline bool
 		is_inside(const InVectorT& P) const {
-			scalar_type winding_number = 0;
+			KahanSum<scalar_type> winding_number;
 
 			// For each triangle
 			for(const triangle_type& t : m_triangle_list) {
 				triangle_type M = t;
+
 				M.row(0) -= P;
 				M.row(1) -= P;
 				M.row(2) -= P;
@@ -133,16 +135,14 @@ namespace saucats {
 				scalar_type a = M.row(0).norm();
 				scalar_type b = M.row(1).norm();
 				scalar_type c = M.row(2).norm();
-				scalar_type omega = M.determinant() /  ((a * b * c) + c * M.row(0).dot(M.row(1)) + a * M.row(1).dot(M.row(2)) + b * M.row(2).dot(M.row(0)));
-				//winding_number += std::atan(omega);
-				winding_number += omega;
+
+				winding_number += std::atan2(M.determinant(), (a * b * c) + c * M.row(0).dot(M.row(1)) + a * M.row(1).dot(M.row(2)) + b * M.row(2).dot(M.row(0)));
 			}
 
 			// Job done
-			//winding_number /= 2 * M_PI;
-			//return winding_number > .5;
-			return winding_number > 0.;
+			return winding_number() >= 2 * M_PI - 1e-7;
 		}
+
 
 
 		std::vector<triangle_type> m_triangle_list;
