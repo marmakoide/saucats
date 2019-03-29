@@ -35,28 +35,28 @@ def build(context):
 		target = 'saucats-custom-shader-2d',
 		source = context.path.ant_glob('custom-shader-2d/*.cpp'),
 		lib    = ['m'],
-		use    = ['saucats', 'png', 'eigen']
+		use    = ['saucats', 'fftw', 'png', 'eigen']
 	)
 
 	context.program(
 		target = 'saucats-polygon-dist-field-render',
 		source = context.path.ant_glob('polygon-dist-field-render/*.cpp'),
 		lib    = ['m'],
-		use    = ['saucats', 'png', 'eigen']
+		use    = ['saucats', 'fftw', 'png', 'eigen']
 	)
 
 	context.program(
 		target = 'saucats-torus-render',
 		source = context.path.ant_glob('torus-render/*.cpp'),
 		lib    = ['m'],
-		use    = ['saucats', 'png', 'eigen']
+		use    = ['saucats', 'fftw', 'png', 'eigen']
 	)
 
 	context.program(
 		target = 'saucats-trimesh',
 		source = context.path.ant_glob('trimesh/*.cpp'),
 		lib    = ['m'],
-		use    = ['stlparser', 'saucats', 'png', 'eigen']
+		use    = ['stlparser', 'saucats', 'fftw', 'png', 'eigen']
 	)
 
 	context.program(
@@ -70,6 +70,6 @@ def build(context):
 		target = 'saucats-docking-3d',
 		source = context.path.ant_glob('docking-3d/*.cpp'),
 		lib    = ['m'],
-		use    = ['saucats', 'fftw', 'png', 'eigen']
+		use    = ['stlparser', 'saucats', 'fftw', 'png', 'eigen']
 	)
 
