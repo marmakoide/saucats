@@ -8,25 +8,6 @@
 
 
 namespace saucats {
-	static void
-	fftshift_rows(Eigen::MatrixXcd& X) {
-		for(Eigen::Index i = 0; i < X.rows() / 2; ++i) {
-			Eigen::Index ip = i + (X.rows() / 2);
-			for(Eigen::Index j = 0; j < X.cols(); ++j)
-				std::swap(X(i, j), X(ip, j));
-		}
-	}
-
-	static void
-	fftshift_cols(Eigen::MatrixXcd& X) {
-		for(Eigen::Index i = 0; i < X.rows(); ++i) {
-			for(Eigen::Index j = 0; j < X.cols() / 2; ++j)
-				std::swap(X(i, j), X(i, j + X.cols() / 2));
-			}
-	}
-
-
-
 	/*
 	 * FFT routines, interfacing with the fftw3 library
 	 */
@@ -141,6 +122,68 @@ namespace saucats {
 
 
 
+
+	class RealFFT1d {
+	public:
+		typedef Eigen::Map<Eigen::Matrix<double, Eigen::Dynamic, 1> > real_mapping_type;
+		typedef Eigen::Map<Eigen::Matrix<std::complex<double>, Eigen::Dynamic, 1> > complex_mapping_type;
+
+
+
+		RealFFT1d(Eigen::Index size) :
+			m_A_data(allocate_real_array(size)),
+			m_U_data(allocate_complex_array(size)),
+			m_A_map(m_A_data, size),
+			m_U_map((std::complex<double>*)m_U_data, 1 + size / 2)
+		{
+			m_fwd_plan = fftw_plan_dft_r2c_1d(size, m_A_data, m_U_data, FFTW_ESTIMATE);
+			m_bwd_plan = fftw_plan_dft_c2r_1d(size, m_U_data, m_A_data, FFTW_ESTIMATE);
+		}
+
+		~RealFFT1d() {
+			fftw_destroy_plan(m_fwd_plan);
+			fftw_destroy_plan(m_bwd_plan);
+			fftw_free(m_U_data);
+			fftw_free(m_A_data);
+		}
+
+		complex_mapping_type&
+		fft(const Eigen::VectorXd& A) {
+			m_A_map = A;
+			fftw_execute(m_fwd_plan);
+			return m_U_map;
+		}
+
+		real_mapping_type&
+		ifft(const Eigen::VectorXcd& U) {
+			m_U_map = U;
+			fftw_execute(m_bwd_plan);
+			return m_A_map;
+		}
+
+	private:
+		static double*
+		allocate_real_array(Eigen::Index size) {
+			return (double*)fftw_malloc(sizeof(double) * size);
+		}
+
+		static fftw_complex*
+		allocate_complex_array(Eigen::Index size) {
+			return (fftw_complex*)fftw_malloc(sizeof(fftw_complex) * (1 + size / 2));
+		}
+
+
+
+		double* m_A_data;
+		fftw_complex* m_U_data;
+		fftw_plan m_fwd_plan;
+		fftw_plan m_bwd_plan;
+		real_mapping_type m_A_map;
+		complex_mapping_type m_U_map;
+	}; // class RealFFT1d
+
+
+
 	class RealFFT2d {
 	public:
 		typedef Eigen::Map<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> > real_mapping_type;
@@ -202,38 +245,63 @@ namespace saucats {
 
 
 
-		/*
-		typedef Eigen::Tensor<std::complex<double>, 3, Eigen::RowMajor> tensor3d_complex_type;
+	class RealFFT3d {
+	public:
+		typedef Eigen::Tensor<double, 3, Eigen::RowMajor> real_data_type;
+		typedef Eigen::Tensor<std::complex<double>, 3, Eigen::RowMajor> complex_data_type;
+		typedef Eigen::TensorMap<real_data_type> real_mapping_type;
+		typedef Eigen::TensorMap<complex_data_type> complex_mapping_type;
 
-		static tensor3d_complex_type
-		fft_3d(const tensor3d_complex_type& A) {
-			Eigen::Index data_size = A.dimension(0) * A.dimension(1) * A.dimension(2);
 
-			// Allocate ressources
-			fftw_complex* A_data = (fftw_complex*)fftw_malloc(sizeof(fftw_complex) * data_size);
-			fftw_complex* U_data = (fftw_complex*)fftw_malloc(sizeof(fftw_complex) * data_size);
-
-			// Mapping of raw data for Eigen library
-			Eigen::Map<tensor3d_complex_type> A_data_map((std::complex<double>*)A_data, A.dimension(0), A.dimension(1), A.dimension(2));
-			Eigen::Map<tensor3d_complex_type> U_data_map((std::complex<double>*)U_data, A.dimension(0), A.dimension(1), A.dimension(2));
-	
-			// Setup FFT computations
-			fftw_plan fftw_plan = fftw_plan_dft_3d(A.dimension(0), A.dimension(1), A.dimension(2), A_data, U_data, FFTW_FORWARD, FFTW_ESTIMATE);
-
-			// Compute FFT
-			A_data_map = A;
-			fftw_execute(fftw_plan);
-			tensor3d_complex_type U = U_data_map;
-
-			// Free ressources	
-			fftw_destroy_plan(fftw_plan);
-			fftw_free(U_data);
-			fftw_free(A_data);
-
-			// Job done
-			return U;
+		RealFFT3d(Eigen::Index size) :
+			m_A_data(allocate_real_array(size)),
+			m_U_data(allocate_complex_array(size)),
+			m_A_map(m_A_data, size, size, size),
+			m_U_map((std::complex<double>*)m_U_data, size, size, 1 + size / 2)
+		{
+			m_fwd_plan = fftw_plan_dft_r2c_3d(size, size, size, m_A_data, m_U_data, FFTW_ESTIMATE);
+			m_bwd_plan = fftw_plan_dft_c2r_3d(size, size, size, m_U_data, m_A_data, FFTW_ESTIMATE);
 		}
-		*/
+
+		~RealFFT3d() {
+			fftw_destroy_plan(m_fwd_plan);
+			fftw_destroy_plan(m_bwd_plan);
+		}
+
+		complex_mapping_type&
+		fft(const real_data_type& A) {
+			m_A_map = A;
+			fftw_execute(m_fwd_plan);
+			return m_U_map;
+		}
+
+		real_mapping_type&
+		ifft(const complex_data_type& U) {
+			m_U_map = U;
+			fftw_execute(m_bwd_plan);
+			return m_A_map;
+		}
+
+	private:
+		static double*
+		allocate_real_array(Eigen::Index size) {
+			return (double*)fftw_malloc(sizeof(double) * size * size * size);
+		}
+
+		static fftw_complex*
+		allocate_complex_array(Eigen::Index size) {
+			return (fftw_complex*)fftw_malloc(sizeof(fftw_complex) * size * size * (1 + size / 2));
+		}
+
+
+
+		double* m_A_data;
+		fftw_complex* m_U_data;
+		fftw_plan m_fwd_plan;
+		fftw_plan m_bwd_plan;
+		real_mapping_type m_A_map;
+		complex_mapping_type m_U_map;
+	}; // class RealFFT3d
 } // namespace saucats
 
 
