@@ -21,6 +21,7 @@ def configure(context):
 	context.check_cfg(package = 'fftw3', uselib_store = 'fftw', args = '--cflags --libs')
 	context.check_cfg(package = 'libpng', atleast_version='1.2.0',  uselib_store = 'png', args = '--cflags --libs')
 	context.check_cfg(package = 'saucats', uselib_store = 'saucats', args = '--cflags')
+	context.check_cfg(package = 'tclap', uselib_store = 'tclap', args = '--cflags')
 
 
 
@@ -63,7 +64,7 @@ def build(context):
 		target = 'saucats-docking-2d',
 		source = context.path.ant_glob('docking-2d/*.cpp'),
 		lib    = ['m'],
-		use    = ['saucats', 'fftw', 'png', 'eigen']
+		use    = ['saucats', 'tclap', 'fftw', 'png', 'eigen']
 	)
 
 	context.program(

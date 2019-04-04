@@ -60,8 +60,8 @@ namespace saucats {
 			for(Eigen::Index j = 0; j < matrix.cols(); ++j) {
 				Eigen::Vector2d P;
 
-				P.x() = (i + .5) / matrix.rows();
-				P.y() = (j + .5) / matrix.cols();			
+				P.x() = (j + .5) / matrix.cols();			
+				P.y() = (i + .5) / matrix.rows();
 				P.array() -= .5;
 				P.array() *= 2 * domain.half_extent().array();
 				P += domain.center();
@@ -69,7 +69,37 @@ namespace saucats {
 				matrix.coeffRef(i, j) = func(P);
 			}
 		}
-	}	
+	}
+
+
+	
+	/*
+	 * Sample a 3d function
+	 */
+
+	template <class func_type, class tensor_type>
+	void
+	sample_function_3d(const BoxT<typename func_type::vector_type>& domain,
+                     tensor_type& tensor,
+                     const func_type& func) {
+		for(Eigen::Index i = 0; i < tensor.dimension(0); ++i) {
+			for(Eigen::Index j = 0; j < tensor.dimension(1); ++j) {
+				for(Eigen::Index k = 0; k < tensor.dimension(2); ++k) {
+					Eigen::Vector3d P;
+					P << 
+					(i + .5) / tensor.dimension(0),
+					(j + .5) / tensor.dimension(1),
+					(k + .5) / tensor.dimension(2);
+				
+					P.array() -= .5;
+					P.array() *= 2 * domain.half_extent().array();
+					P += domain.center();
+
+					tensor.coeffRef(i, j, k) = func(P);
+				}
+			}
+		}
+	}
 } // namespace saucats
 
 

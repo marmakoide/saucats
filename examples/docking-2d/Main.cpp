@@ -5,6 +5,8 @@
 
 #include <saucats/utils/Algorithm.h>
 
+#include <tclap/CmdLine.h>
+
 #include <fstream>
 #include <iostream>
 
@@ -40,7 +42,7 @@ get_left_sdf() {
 
 
 auto
-get_right_sdf() {
+get_right_sdf(double angle) {
 	Eigen::Matrix<double, Eigen::Dynamic, 2> vertex_array(8, 2);
 	vertex_array <<
 		 0.,  0.,
@@ -52,7 +54,7 @@ get_right_sdf() {
 		 3.,  2.,
 		 0.,  2.;
 
-	return get_sdf_rotation2(get_polygon2_sdf(vertex_array), (M_PI / 180.) * 42.);	
+	return get_sdf_rotation2(get_polygon2_sdf(vertex_array), (M_PI / 180.) * angle);	
 }
 
 
@@ -130,15 +132,25 @@ get_shader(const left_func_type& left_func,
  * Main entry point
  */
 
-int
-main(int UNUSED_PARAM(argc), char** UNUSED_PARAM(argv)) {
+void
+process(double angle,
+        double sampling_resolution,
+        bool complementary_mode) {
 	// Define the shapes to dock together
 	auto left_sdf = get_left_sdf();
-	auto right_sdf = get_right_sdf();
+	auto right_sdf = get_right_sdf(angle);
 
 	// Compute the transformation to dock 'right' shape into 'left' shape
 	Eigen::Transform<double, 2, Eigen::Affine> transform = 
-		registrate_2d(left_sdf, right_sdf, .1, true);
+		registrate_2d(left_sdf, right_sdf, sampling_resolution, complementary_mode);
+
+	// Output transformation parameters
+	{
+		Eigen::Matrix2d M = transform.rotation();
+		Eigen::Vector2d T = transform.translation();
+		cout << "rotation = " << (180. / M_PI) * std::atan2(M(1, 0), M(0, 0)) << endl;
+		cout << "translation = [" << T.x() << ", " << T.y() << "]" << endl;
+	}
 
 	// Setup the render target
 	PNGRenderTarget render_target("out.png", 512, 512);
@@ -149,6 +161,37 @@ main(int UNUSED_PARAM(argc), char** UNUSED_PARAM(argv)) {
 
 	// Render the distance field
 	get_renderer(shader, render_target).render();
+}
+
+
+
+int
+main(int argc, char* argv[]) {
+	try {
+		// Define command line
+		TCLAP::CmdLine parser("2d docking demo", ' ', "1.0");
+
+		
+		TCLAP::SwitchArg complementary_arg("c", "complementary-mode", "Switch from alignment to docking mode", false);
+		parser.add(complementary_arg);
+
+		TCLAP::ValueArg<double> resolution_arg("r", "resolution", "Sampling resolution", false, .1, "positive number");
+		parser.add(resolution_arg);
+
+		TCLAP::ValueArg<double> angle_arg("a", "angle", "Rotation angle in degrees", false, 0., "positive number");
+		parser.add(angle_arg);
+
+		// Parse command line
+		parser.parse(argc, argv);	
+
+		// Process stuffs
+		process(angle_arg.getValue(),
+		        resolution_arg.getValue(),
+		        complementary_arg.getValue());
+	}
+	catch (TCLAP::ArgException& e) {
+		std::cerr << "error: " << e.error() << " for argument " << e.argId() << std::endl;
+	}
 
 	// Job done
 	return EXIT_SUCCESS;

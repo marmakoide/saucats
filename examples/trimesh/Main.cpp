@@ -23,7 +23,7 @@ main(int UNUSED_PARAM(argc), char** UNUSED_PARAM(argv)) {
 	);
 
 	// Setup the render target
-	PNGRenderTarget render_target("out.png", 512, 512);
+	PNGRenderTarget render_target("out.png", 32, 32);
 
 	// Setup the shader
 	PerspectiveProjectiond projection;

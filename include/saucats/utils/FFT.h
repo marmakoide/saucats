@@ -122,6 +122,61 @@ namespace saucats {
 
 
 
+	class FFT3d {
+	public:
+		typedef Eigen::Tensor<std::complex<double>, 3, Eigen::RowMajor> data_type;
+		typedef Eigen::TensorMap<data_type> mapping_type;
+
+
+
+		FFT3d(Eigen::Index size) :
+			m_A_data(allocate_array(size)),
+			m_U_data(allocate_array(size)),
+			m_A_map((std::complex<double>*)m_A_data, size, size, size),
+			m_U_map((std::complex<double>*)m_U_data, size, size, size)
+		{
+			m_fwd_plan = fftw_plan_dft_3d(size, size, size, m_A_data, m_U_data, FFTW_FORWARD, FFTW_ESTIMATE);
+			m_bwd_plan = fftw_plan_dft_3d(size, size, size, m_U_data, m_A_data, FFTW_BACKWARD, FFTW_ESTIMATE);
+		}
+
+		~FFT3d() {
+			fftw_destroy_plan(m_fwd_plan);
+			fftw_destroy_plan(m_bwd_plan);
+			fftw_free(m_U_data);
+			fftw_free(m_A_data);
+		}
+
+		mapping_type&
+		fft(const data_type& A) {
+			m_A_map = A;
+			fftw_execute(m_fwd_plan);
+			return m_U_map;
+		}
+
+		mapping_type&
+		ifft(const data_type& U) {
+			m_U_map = U;
+			fftw_execute(m_bwd_plan);
+			return m_A_map;
+		}
+
+	private:
+		static fftw_complex*
+		allocate_array(Eigen::Index size) {
+			return (fftw_complex*)fftw_malloc(sizeof(fftw_complex) * size * size * size);
+		}
+
+
+
+		fftw_complex* m_A_data;
+		fftw_complex* m_U_data;
+		fftw_plan m_fwd_plan;
+		fftw_plan m_bwd_plan;
+		mapping_type m_A_map;
+		mapping_type m_U_map;
+	}; // class FFT3d
+
+
 
 	class RealFFT1d {
 	public:
@@ -266,6 +321,8 @@ namespace saucats {
 		~RealFFT3d() {
 			fftw_destroy_plan(m_fwd_plan);
 			fftw_destroy_plan(m_bwd_plan);
+			fftw_free(m_U_data);
+			fftw_free(m_A_data);
 		}
 
 		complex_mapping_type&
