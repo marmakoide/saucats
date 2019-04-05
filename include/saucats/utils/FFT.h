@@ -4,6 +4,7 @@
 #include <fftw3.h>
 #include <Eigen/Dense>
 #include <unsupported/Eigen/CXX11/Tensor>
+#include <iostream>
 
 
 
@@ -14,7 +15,8 @@ namespace saucats {
 
 	class FFT1d {
 	public:
-		typedef Eigen::Map<Eigen::Matrix<std::complex<double>, Eigen::Dynamic, 1> > mapping_type;
+		typedef Eigen::Matrix<std::complex<double>, Eigen::Dynamic, 1> data_type;
+		typedef Eigen::Map<data_type> mapping_type;
 
 
 
@@ -36,14 +38,14 @@ namespace saucats {
 		}
 
 		mapping_type&
-		fft(const Eigen::VectorXcd& A) {
+		fft(const data_type& A) {
 			m_A_map = A;
 			fftw_execute(m_fwd_plan);
 			return m_U_map;
 		}
 
 		mapping_type&
-		ifft(const Eigen::VectorXcd& U) {
+		ifft(const data_type& U) {
 			m_U_map = U;
 			fftw_execute(m_bwd_plan);
 			return m_A_map;
@@ -129,14 +131,16 @@ namespace saucats {
 
 
 
-		FFT3d(Eigen::Index size) :
-			m_A_data(allocate_array(size)),
-			m_U_data(allocate_array(size)),
-			m_A_map((std::complex<double>*)m_A_data, size, size, size),
-			m_U_map((std::complex<double>*)m_U_data, size, size, size)
+		FFT3d(Eigen::Index x_size,
+		      Eigen::Index y_size,
+		      Eigen::Index z_size) :
+			m_A_data(allocate_array(x_size, y_size, z_size)),
+			m_U_data(allocate_array(x_size, y_size, z_size)),
+			m_A_map((std::complex<double>*)m_A_data, x_size, y_size, z_size),
+			m_U_map((std::complex<double>*)m_U_data, x_size, y_size, z_size)
 		{
-			m_fwd_plan = fftw_plan_dft_3d(size, size, size, m_A_data, m_U_data, FFTW_FORWARD, FFTW_ESTIMATE);
-			m_bwd_plan = fftw_plan_dft_3d(size, size, size, m_U_data, m_A_data, FFTW_BACKWARD, FFTW_ESTIMATE);
+			m_fwd_plan = fftw_plan_dft_3d(x_size, y_size, z_size, m_A_data, m_U_data, FFTW_FORWARD, FFTW_ESTIMATE);
+			m_bwd_plan = fftw_plan_dft_3d(x_size, y_size, z_size, m_U_data, m_A_data, FFTW_BACKWARD, FFTW_ESTIMATE);
 		}
 
 		~FFT3d() {
@@ -162,8 +166,10 @@ namespace saucats {
 
 	private:
 		static fftw_complex*
-		allocate_array(Eigen::Index size) {
-			return (fftw_complex*)fftw_malloc(sizeof(fftw_complex) * size * size * size);
+		allocate_array(Eigen::Index x_size,
+		               Eigen::Index y_size,
+		               Eigen::Index z_size) {
+			return (fftw_complex*)fftw_malloc(sizeof(fftw_complex) * x_size * y_size * z_size);
 		}
 
 
