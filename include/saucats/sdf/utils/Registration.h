@@ -161,7 +161,7 @@ namespace saucats {
 	
 			// Search for the maximum element of C
 			Eigen::Array3i arg_max;
-			get_3d_real_tensor_arg_max(C, arg_max);
+			score = get_3d_real_tensor_arg_max(C, arg_max);
 
 			// Adjust coordinates
 			for(int i = 0; i < 3; i++)
@@ -252,14 +252,14 @@ namespace saucats {
 		Eigen::MatrixXcd A = fft_2d.fft(U);
 		A.array() /= A.cwiseAbs().array();
 	
-		std::vector<Eigen::Index> angle_list;
-		angle_list.push_back(0);
+		std::vector<Eigen::Index> theta_list;
+		theta_list.push_back(0);
 
 		auto rotated_right_func = get_sdf_rotation2(right_func, 0.);
 		bool converged = false;
 		int max_epoch = 100;
 		for(int epoch = 0; (epoch < max_epoch) and (!converged); ++epoch) {
-			// Compute C, the pseudo FFT of pseudo-polar FFT for right function
+			// Compute B, the pseudo FFT of pseudo-polar FFT for right function
 			Eigen::MatrixXcd V = pseudo_polar_fft(right_M).cwiseAbs();
 			Eigen::MatrixXcd B = fft_2d.fft(V);
 
@@ -281,23 +281,25 @@ namespace saucats {
 				theta_delta += 2 * matrix_size;
 			
 			// Compute the angle
-			Eigen::Index angle = (angle_list.back() + theta_delta) % (4 * matrix_size);
+			Eigen::Index theta = (theta_list.back() + theta_delta) % (4 * matrix_size);
 
 			// Check that we didn't find this angle before
-			if (std::find(angle_list.begin(), angle_list.end(), angle) != angle_list.end())
+			if (std::find(theta_list.begin(), theta_list.end(), theta) != theta_list.end())
 				converged = true;
 
-			angle_list.push_back(angle);
+			theta_list.push_back(theta);
 
 			// Resample the right function
-			rotated_right_func = get_sdf_rotation2(right_func, -(.5 * M_PI / matrix_size) * angle);
-			right_bounding_sphere = rotated_right_func.get_bounding_sphere();
-			right_domain = Sphere2d(right_bounding_sphere.center(), right_bounding_sphere.radius());
-			registration::fill_density_matrix(rotated_right_func, right_M, right_domain, unit_circle_samples, resolution);
+			if (theta_delta != 0) {
+				rotated_right_func = get_sdf_rotation2(right_func, -(.5 * M_PI / matrix_size) * theta);
+				right_bounding_sphere = rotated_right_func.get_bounding_sphere();
+				right_domain = Sphere2d(right_bounding_sphere.center(), right_bounding_sphere.radius());
+				registration::fill_density_matrix(rotated_right_func, right_M, right_domain, unit_circle_samples, resolution);
+			}
  		}
 		
-		// Convert the angle to radian 
-		double angle = (.5 * M_PI / matrix_size) * angle_list.back();
+		// Retrieve the angle
+		Eigen::Index theta = theta_list.back();
 		
 		// Solve the translation component
 		double hi_score = 0.;
@@ -313,8 +315,8 @@ namespace saucats {
 			T = hi_T;
 		else {
 			T = lo_T;
-			angle += M_PI;
-			rotated_right_func = get_sdf_rotation2(right_func, -angle);
+			theta = (theta + 2 * matrix_size) % (4 * matrix_size);
+			rotated_right_func = get_sdf_rotation2(right_func, -(.5 * M_PI / matrix_size) * theta);
 			right_bounding_sphere = rotated_right_func.get_bounding_sphere();
 		}
 
@@ -324,7 +326,7 @@ namespace saucats {
 		// Job done
 		return
 			Eigen::Translation<double, 2>(-T) *
-			Eigen::Rotation2D<double>(-angle);
+			Eigen::Rotation2D<double>(-(.5 * M_PI / matrix_size) * theta);
 	}
 
 
@@ -350,7 +352,7 @@ namespace saucats {
 
 		Sphere3d right_domain = Sphere3d(right_bounding_sphere.center(), right_bounding_sphere.radius());
 
-		// Compute matric size
+		// Compute matrix size
 		double domain_radius = std::sqrt(std::max(left_domain.squared_radius(), right_domain.squared_radius()));
 		Eigen::Index matrix_size = get_smallest_greater_power_of_2(Eigen::Index(std::ceil(2 * domain_radius / resolution)));
 
@@ -361,121 +363,116 @@ namespace saucats {
 		registration::fill_density_tensor(left_func, left_M, left_domain, unit_sphere_samples, resolution);
 		registration::fill_density_tensor(right_func, right_M, right_domain, unit_sphere_samples, resolution);
 
-		// Switch sign of right function
+		// Switch sign of left function
 		if (complement)
-			right_M = -right_M;
+			left_M = -left_M;
 	
 		// Solve the Z rotation angle
 		PseudoPolarCylindricalFFT3d pseudo_polar_cylindrical_fft(matrix_size);
-		FFT3d fft_3d(2 * matrix_size);
+		FFT3d fft_3d(2 * matrix_size, 2 * matrix_size, matrix_size);
 
-		RealFFT3d::complex_data_type U = pseudo_polar_cylindrical_fft(left_M).abs();
+		RealFFT3d::complex_data_type U = pseudo_polar_cylindrical_fft(left_M);
+		{
+			for(int i = 0; i < 2 * matrix_size; ++i)
+				for(int j = 0; j < 2 * matrix_size; ++j)
+					for(int k = 0; k < matrix_size; ++k)
+						U(i, j, k) = std::abs(U(i, j, k));
+		}
+		
 		RealFFT3d::complex_data_type A = fft_3d.fft(U);
-		RealFFT3d::real_data_type A_abs = A.abs();
+		A /= A.abs();
 
-		std::vector<Eigen::Index> angle_list;
-		angle_list.push_back(0);
+		std::vector<Eigen::Index> theta_list;
+		theta_list.push_back(0);
 
-		Eigen::Transform<double, 3, Eigen::Affine> transform;
-		auto rotated_right_func = get_sdf_affine_transform(right_func, transform);
+		auto rotated_right_func = get_sdf_rotation3(right_func, Eigen::AngleAxisd(0., Eigen::Vector3d::UnitZ()));
 
-		int max_epoch = 10;
-		for(int epoch = 0; epoch < max_epoch; ++epoch) {
-			RealFFT3d::complex_data_type V = pseudo_polar_cylindrical_fft(right_M).abs();
+		bool converged = false;
+		int max_epoch = 100;
+		for(int epoch = 0; (epoch < max_epoch) and (!converged); ++epoch) {
+			// Compute B, the pseudo FFT of pseudo-polar FFT for right function
+			RealFFT3d::complex_data_type V = pseudo_polar_cylindrical_fft(right_M);
+			{
+				for(int i = 0; i < 2 * matrix_size; ++i)
+					for(int j = 0; j < 2 * matrix_size; ++j)
+						for(int k = 0; k < matrix_size; ++k)
+							V(i, j, k) = std::abs(V(i, j, k));
+			}			
 			RealFFT3d::complex_data_type B = fft_3d.fft(V);
 			RealFFT3d::real_data_type B_abs = B.abs();
 
+			// Compute correlation of A and B
 			RealFFT3d::complex_data_type C = B.conjugate();
 			C *= A;
-			C /= A_abs;
 			C /= B_abs;
 			RealFFT3d::complex_data_type W = fft_3d.ifft(C);
 			RealFFT3d::real_data_type W_abs = W.abs();
 
+			// Look for the maximum correlation coefficient
 			Eigen::Array3i arg_max;
 			get_3d_real_tensor_arg_max(W_abs, arg_max);
 
-			Eigen::Index theta;
-			if (arg_max.coeff(0) < matrix_size)
-				theta = -arg_max.coeff(0);
-			else
-				theta = 2 * matrix_size - arg_max.coeff(0);
+			// Compute the angle increment
+			Eigen::Index theta_delta = -arg_max.coeff(1);
+			if (arg_max.coeff(1) >= matrix_size)
+				theta_delta += 2 * matrix_size;
 		
-			Eigen::Index angle = (angle_list.back() + theta) % (4 * matrix_size);
+			// Compute the angle
+			Eigen::Index theta = (theta_list.back() + theta_delta) % (4 * matrix_size);
 
-			if (std::find(angle_list.begin(), angle_list.end(), angle) != angle_list.end()) {
-				angle_list.push_back(angle);
-				break;
+			// Check that we didn't find this angle before
+			if (std::find(theta_list.begin(), theta_list.end(), theta) != theta_list.end())
+				converged = true;
+
+			theta_list.push_back(theta);
+			
+			std::cout << "angle = " << (90. / matrix_size) * theta << std::endl;
+
+			// Resample right function if required
+			if (theta_delta != 0) {
+				rotated_right_func = get_sdf_rotation3(right_func, Eigen::AngleAxisd(-(.5 * M_PI / matrix_size) * theta, Eigen::Vector3d::UnitZ()));
+				right_bounding_sphere = rotated_right_func.get_bounding_sphere();
+				right_domain = Sphere3d(right_bounding_sphere.center(), right_bounding_sphere.radius());
+				registration::fill_density_tensor(rotated_right_func, right_M, right_domain, unit_sphere_samples, resolution);
 			}
-
-			angle_list.push_back(angle);
-
-			transform = Eigen::AngleAxisd(Eigen::AngleAxisd(-(.5 * M_PI / matrix_size) * angle, Eigen::Vector3d::UnitZ()));
-			rotated_right_func = get_sdf_affine_transform(right_func, transform);
-			std::cout << "angle = " << (.5 * M_PI / matrix_size) * angle << std::endl;
-
-			right_bounding_sphere = rotated_right_func.get_bounding_sphere();
-			right_domain = Sphere3d(right_bounding_sphere.center(), right_bounding_sphere.radius());
-			registration::fill_density_tensor(rotated_right_func, right_M, right_domain, unit_sphere_samples, resolution);
-
-			if (complement)
-				right_M = -right_M;
  		}
 
-		double angle = (.5 * M_PI / matrix_size) * angle_list.back();
+		// Retrieve the angle
+		Eigen::Index theta = theta_list.back();
 		
-		// Job done
-		Eigen::Transform<double, 3, Eigen::Affine> ret;
-		ret.setIdentity();
-		ret = Eigen::AngleAxisd(Eigen::AngleAxisd(-angle, Eigen::Vector3d::UnitZ()));
-		return ret;
-	}
-
-	/*
-	template <class left_func_type, class right_func_type>
-	Eigen::Transform<double, 3, Eigen::Affine>
-	registrate_3d(const left_func_type& left_func,
-  	            const right_func_type& right_func,
-  	            double resolution,
-	              bool complement) {
-		auto unit_sphere_samples = get_spiral_sphere<double>(256);
-
-		// Compute left and right sdf bounding sphere
-		auto left_bounding_sphere = left_func.get_bounding_sphere();
-		auto right_bounding_sphere = right_func.get_bounding_sphere();
-
-		// Compute left and right domains
-		auto left_domain = Sphere3d(left_bounding_sphere.center(), left_bounding_sphere.radius() + 2 * right_bounding_sphere.radius());
-		auto right_domain = Sphere3d(right_bounding_sphere.center(), right_bounding_sphere.radius());
-
-		// Compute matric size
-		double domain_radius = std::sqrt(std::max(left_domain.squared_radius(), right_domain.squared_radius()));
-		Eigen::Index matrix_size = get_smallest_greater_power_of_2(Eigen::Index(std::ceil(2 * domain_radius / resolution)));
-
-		// Discretize the left and right function
-		RealFFT3d::real_data_type left_M(matrix_size, matrix_size, matrix_size);
-		RealFFT3d::real_data_type right_M(matrix_size, matrix_size, matrix_size);
-
-		registration::fill_density_tensor(left_func, left_M, left_domain, unit_sphere_samples, resolution);
-		registration::fill_density_tensor(right_func, right_M, right_domain, unit_sphere_samples, resolution);
-
-		// Switch sign of right function
-		if (complement)
-			right_M = -right_M;
-	
 		// Solve the translation component
-		double score = 0.;
-		Eigen::Vector3d T = registration::solve_translation_3d(left_M, right_M, score);
+		double hi_score = 0.;
+		Eigen::Vector3d hi_T = registration::solve_translation_3d(left_M, right_M, hi_score);
 
-		T *= -2 * domain_radius / matrix_size;
-		T += right_bounding_sphere.center() - left_bounding_sphere.center(); 
+		tensor_rotate_xy_180(right_M);
+
+		double lo_score = 0.;
+		Eigen::Vector3d lo_T = registration::solve_translation_3d(left_M, right_M, lo_score);
+
+		Eigen::Vector3d T;
+		if (hi_score > lo_score) {
+			T = hi_T;
+			std::cout << "hi" << std::endl;
+		}
+		else {
+			T = lo_T;
+			theta = (theta + 2 * matrix_size) % (4 * matrix_size);
+			rotated_right_func = get_sdf_rotation3(right_func, Eigen::AngleAxisd(-(.5 * M_PI / matrix_size) * theta, Eigen::Vector3d::UnitZ()));
+			right_bounding_sphere = rotated_right_func.get_bounding_sphere();
+			std::cout << "lo" << std::endl;
+		}
 		
+		T *= -resolution;
+		T += right_bounding_sphere.center() - left_bounding_sphere.center(); 
+
+		std::cout << "z-axis rotation angle = " << (-90. / matrix_size) * theta << std::endl;
+		std::cout << "translation = [" << T.x() << ", " << T.y() << ", " << T.z() << "]" << std::endl;
+
 		// Job done
-		Eigen::Transform<double, 3, Eigen::Affine> ret;
-		ret = Eigen::Translation<double, 3>(-T);
-		return ret;
+		return
+			Eigen::Translation<double, 3>(-T) *
+			Eigen::AngleAxisd(-(.5 * M_PI / matrix_size) * theta, Eigen::Vector3d::UnitZ());
 	}
-	*/
 } // namespace saucats
 
 

@@ -27,6 +27,26 @@ namespace saucats {
 
 		return coeff_max;
 	}
+
+
+
+	/*
+	 * 180 degrees rotation of a matrix on xy plane
+	 */
+
+	template <class matrix_type>
+	void
+	tensor_rotate_xy_180(matrix_type& U) {
+		for(Eigen::Index i = 0; i < U.dimension(2); ++i) {
+			for(Eigen::Index j = 0; j < U.dimension(0); ++j)
+				for(Eigen::Index k = 0; k < U.dimension(1) / 2; ++k)
+					std::swap(U.coeffRef(j, k, i), U.coeffRef(j, U.dimension(1) - k - 1, i));
+
+			for(Eigen::Index j = 0; j < U.dimension(1); ++j)
+				for(Eigen::Index k = 0; k < U.dimension(0) / 2; ++k)
+					std::swap(U.coeffRef(k, j, i), U.coeffRef(U.dimension(0) - k - 1, j, i));
+		}
+	}
 } // namespace saucats
 
 

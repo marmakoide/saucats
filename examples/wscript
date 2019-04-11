@@ -71,6 +71,6 @@ def build(context):
 		target = 'saucats-docking-3d',
 		source = context.path.ant_glob('docking-3d/*.cpp'),
 		lib    = ['m'],
-		use    = ['stlparser', 'saucats', 'fftw', 'png', 'eigen']
+		use    = ['stlparser', 'saucats', 'tclap', 'fftw', 'png', 'eigen']
 	)
 
