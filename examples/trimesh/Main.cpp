@@ -35,7 +35,7 @@ main(int UNUSED_PARAM(argc), char** UNUSED_PARAM(argv)) {
 	auto shader = get_isosurface_3d_shader(sdf, frag_shader, bg_shader, projection);
 
 	// Render the distance field
-	auto renderer = get_renderer(shader, render_target);
+	auto renderer = get_renderer_2d(shader, render_target);
 	renderer.render();
 	cout << "render time = " << renderer.render_time() << endl;
 

@@ -30,7 +30,7 @@ main(int UNUSED_PARAM(argc), char** UNUSED_PARAM(argv)) {
 	auto shader = get_isosurface_3d_shader(sdf, frag_shader, bg_shader, projection);
 
 	// Render the distance field
-	get_renderer(shader, render_target).render();
+	get_renderer_2d(shader, render_target).render();
 
 	// Job done
 	return EXIT_SUCCESS;

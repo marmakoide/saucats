@@ -160,7 +160,7 @@ process(double angle,
 	auto shader = get_shader(left_sdf, transformed_right_sdf);
 
 	// Render the distance field
-	get_renderer(shader, render_target).render();
+	get_renderer_2d(shader, render_target).render();
 }
 
 

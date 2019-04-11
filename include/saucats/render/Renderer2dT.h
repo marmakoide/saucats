@@ -1,5 +1,5 @@
-#ifndef SAUCATS_RENDER_RENDERER_T_H
-#define SAUCATS_RENDER_RENDERER_T_H
+#ifndef SAUCATS_RENDER_RENDERER_2D_T_H
+#define SAUCATS_RENDER_RENDERER_2D_T_H
 
 #include <saucats/utils/StopWatch.h>
 
@@ -14,16 +14,16 @@ namespace saucats {
 	 */
 
 	template <class shader_type, class target_type>
-	class RendererT {
+	class Renderer2dT {
 	public:
 		typedef typename shader_type::uv_coord_type uv_coord_type;
 		typedef typename shader_type::color_type color_type;
 
 
 
-		RendererT(const shader_type& shader,
-		          target_type& target,
-			        int supersampling_level = 1) :
+		Renderer2dT(const shader_type& shader,
+		            target_type& target,
+			          int supersampling_level = 1) :
 			m_shader(shader),
 			m_target(target),
 			m_render_time(0),
@@ -74,19 +74,19 @@ namespace saucats {
 		target_type& m_target;
 		unsigned int m_render_time;
 		int m_supersampling_level;
-	}; // class Renderer
+	}; // class Renderer2d
 
 
 
 	// Helper function to get an instance of a renderer
 	template <class shader_type, class target_type>
-	RendererT<shader_type, target_type>
-	get_renderer(const shader_type& shader,
-	             target_type& target) {
-		return RendererT<shader_type, target_type>(shader, target);
+	Renderer2dT<shader_type, target_type>
+	get_renderer_2d(const shader_type& shader,
+	                target_type& target) {
+		return Renderer2dT<shader_type, target_type>(shader, target);
 	}
 } // namespace saucats
 
 
 
-#endif // SAUCATS_RENDER_RENDERER_T_H
+#endif // SAUCATS_RENDER_RENDERER_2D_T_H

@@ -38,7 +38,7 @@ main(int UNUSED_PARAM(argc), char** UNUSED_PARAM(argv)) {
 	auto shader = get_dist_field_2d_shader(sdf, dist_shader);
 
 	// Render the distance field
-	get_renderer(shader, render_target).render();
+	get_renderer_2d(shader, render_target).render();
 
 	// Job done
 	return EXIT_SUCCESS;
