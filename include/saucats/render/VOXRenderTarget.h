@@ -191,8 +191,7 @@ namespace saucats {
 			std::uint32_t voxel_count = voxel_data.size();
 			chunk_data.write(reinterpret_cast<char*>(&voxel_count), 4);
 
-			int i = 0;
-			for(std::map<VoxelPos, std::uint8_t>::const_iterator it = voxel_data.cbegin(); it != voxel_data.cend(); ++it,++i) {
+			for(std::map<VoxelPos, std::uint8_t>::const_iterator it = voxel_data.cbegin(); it != voxel_data.cend(); ++it) {
 				std::uint8_t x = (*it).first.x();
 				std::uint8_t y = (*it).first.y();
 				std::uint8_t z = (*it).first.z();
