@@ -371,14 +371,7 @@ namespace saucats {
 		PseudoPolarCylindricalFFT3d pseudo_polar_cylindrical_fft(matrix_size);
 		FFT3d fft_3d(2 * matrix_size, 2 * matrix_size, matrix_size);
 
-		RealFFT3d::complex_data_type U = pseudo_polar_cylindrical_fft(left_M);
-		{
-			for(int i = 0; i < 2 * matrix_size; ++i)
-				for(int j = 0; j < 2 * matrix_size; ++j)
-					for(int k = 0; k < matrix_size; ++k)
-						U(i, j, k) = std::abs(U(i, j, k));
-		}
-		
+		RealFFT3d::complex_data_type U = pseudo_polar_cylindrical_fft(left_M).abs().cast<std::complex<double> >();
 		RealFFT3d::complex_data_type A = fft_3d.fft(U);
 		A /= A.abs();
 
@@ -391,20 +384,13 @@ namespace saucats {
 		int max_epoch = 100;
 		for(int epoch = 0; (epoch < max_epoch) and (!converged); ++epoch) {
 			// Compute B, the pseudo FFT of pseudo-polar FFT for right function
-			RealFFT3d::complex_data_type V = pseudo_polar_cylindrical_fft(right_M);
-			{
-				for(int i = 0; i < 2 * matrix_size; ++i)
-					for(int j = 0; j < 2 * matrix_size; ++j)
-						for(int k = 0; k < matrix_size; ++k)
-							V(i, j, k) = std::abs(V(i, j, k));
-			}			
+			RealFFT3d::complex_data_type V = pseudo_polar_cylindrical_fft(right_M).abs().cast<std::complex<double> >();
 			RealFFT3d::complex_data_type B = fft_3d.fft(V);
-			RealFFT3d::real_data_type B_abs = B.abs();
 
 			// Compute correlation of A and B
 			RealFFT3d::complex_data_type C = B.conjugate();
 			C *= A;
-			C /= B_abs;
+			C /= B.abs();
 			RealFFT3d::complex_data_type W = fft_3d.ifft(C);
 			RealFFT3d::real_data_type W_abs = W.abs();
 
