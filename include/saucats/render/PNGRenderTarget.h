@@ -33,8 +33,8 @@ namespace saucats {
 
 	class PNGRenderTarget {
 	public:
-		inline PNGRenderTarget(const std::string& path,
-		                       int w, int h) :
+		PNGRenderTarget(const std::string& path,
+		                int w, int h) :
 			m_w(w),
 			m_h(h),
 			m_path(path),
@@ -66,7 +66,7 @@ namespace saucats {
 			// Compute the pixel address
 			std::uint8_t* pixel = (std::uint8_t*)m_pixel_data;
 			pixel += j * 3 * m_w;
-			pixel += 3 * i;
+			pixel += i * 3;
 
 			// Write the pixel
 			pixel[0] = (std::uint8_t)std::floor(255. * color.coeff(0));

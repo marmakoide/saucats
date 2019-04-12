@@ -12,6 +12,8 @@
 #include <saucats/render/PhongFragmentShader.h>
 #include <saucats/render/PNGRenderTarget.h>
 #include <saucats/render/Renderer2dT.h>
+#include <saucats/render/Renderer3dT.h>
+#include <saucats/render/VOXRenderTarget.h>
 
 
 
